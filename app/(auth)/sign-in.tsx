@@ -6,18 +6,16 @@ import CustomButton from '@/components/CustomButton';
 import FormField from '@/components/FormField';
 import axios from 'axios';
 import SimpleStore from 'react-native-simple-store';
-
+import { useGlobalContext } from '@/context/GloberProvider';
 const SignIn = () => {
   const [form, setForm] = useState({
     email: '',
     password: '',
   });
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState<String>('')
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const passwordRef = useRef(null);
+  const { setIsLogged, setUser } = useGlobalContext(); // Access loginUser from GlobalContext
 
   const handleEmailSubmit = () => {
     passwordRef.current.focus(); // Move focus to password field
@@ -30,11 +28,11 @@ const SignIn = () => {
   const submit = async () => {
     if (form.email === "" && form.password === "") {
       Alert.alert("Error", "Please Enter User name and Password");
-      return; // Exit early if fields are not filled
+      return;
     }
     if (form.password === "") {
       Alert.alert("Error", "Please Enter Password");
-      return; // Exit early if fields are not filled
+      return;
     }
     setIsSubmitting(true);
 
@@ -48,21 +46,18 @@ const SignIn = () => {
         {
           headers: {
             'Content-Type': 'application/json',
-          },
+          }
         }
       );
 
       if (response.status !== 200) {
         throw new Error('Invalid username or password');
       }
-
       const userData = response.data; // Get user data from the response
-
-      // Save user data to local storage
-      await SimpleStore.save('user', userData);
-      await SimpleStore.save('loggedIn', true);
-      // console.log(userData);
-
+      // Save user data globally using context
+      await AsyncStorage.setItem("token", userData.token)
+      setIsLogged(true)
+      setUser(userData);
       Alert.alert("Success", "User signed in successfully");
       router.replace("/home");
     } catch (error) {
@@ -71,21 +66,6 @@ const SignIn = () => {
       setIsSubmitting(false);
     }
   };
-
-  const getUser = async () => {
-    try {
-      const storedUser = await SimpleStore.get('user');
-      setUser(storedUser);
-      setToken(storedUser?.token)
-    } catch (err) {
-      console.error('Failed to get user from SimpleStore', err);
-    }
-  };
-
-  useEffect(() => {
-    getUser();
-  }, []);
-
 
   return (
     <KeyboardAvoidingView className='flex-1'
@@ -101,10 +81,7 @@ const SignIn = () => {
             <FormField
               title="User Name"
               value={form.email}
-              handleChangeText={(e) => setForm({
-                ...form,
-                email: e,
-              })}
+              handleChangeText={(e) => setForm({ ...form, email: e })}
               otherStyles="mt-7"
               keyboardType='email-address'
               placeholder="Enter User Name.."
@@ -114,10 +91,7 @@ const SignIn = () => {
               ref={passwordRef}
               title="Password"
               value={form.password}
-              handleChangeText={(e) => setForm({
-                ...form,
-                password: e,
-              })}
+              handleChangeText={(e) => setForm({ ...form, password: e })}
               otherStyles="mt-7"
               placeholder="Enter Password"
               onSubmitEditing={handlePasswordSubmit} // Submit form

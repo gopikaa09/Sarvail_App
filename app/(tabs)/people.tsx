@@ -6,6 +6,7 @@ import SimpleStore from 'react-native-simple-store';
 import UsersCard from '@/components/UsersCard';
 import SearchInput from '@/components/SearchInput';
 import { debounce } from 'lodash';
+import { useGlobalContext } from '@/context/GloberProvider';
 
 const People = () => {
   const [data, setData] = useState([]);
@@ -23,6 +24,10 @@ const People = () => {
   const searchBarOpacity = useRef(new Animated.Value(0)).current;
   const scrollY = useRef(new Animated.Value(0)).current;
   const prevScrollY = useRef(0);
+  const { user: UserData } = useGlobalContext()
+  console.log('====================================');
+  console.log(UserData);
+  console.log('====================================');
 
   const getUser = async () => {
     try {
