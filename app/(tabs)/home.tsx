@@ -22,33 +22,33 @@ const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false); // Start with false
   const [searchFocused, setSearchFocused] = useState(false);
-
-
+  const searchBarHeight = useRef(new Animated.Value(0)).current;  // Animation for height and translateY
+  const searchBarOpacity = useRef(new Animated.Value(0)).current;
+  const [isCarouselScrolling, setIsCarouselScrolling] = useState(false);  // New state
+  const [page, setPage] = useState(1); // Track current page
+  const [hasMore, setHasMore] = useState(true);
 
   const router = useRouter();
   const scrollY = useRef(new Animated.Value(0)).current;
   const prevScrollY = useRef(0);
 
   useEffect(() => {
-    fetchData(selectedFilters);
-  }, [selectedFilters]);
+    fetchData();
+  }, [selectedFilters, page]);  // Include 'page' here
 
-  const fetchData = async (categories) => {
+
+  const fetchCorouselData = async () => {
     setLoading(true);
-    setRefreshing(true);
+    setRefreshing(page === 1);
     try {
-      const categoryQuery = categories.length > 0 ? `&category=${categories.join(',')}` : '';
       const response = await fetch(
-        `http://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=200${categoryQuery}`
+        `http://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=20`
       );
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
       const json = await response.json();
-      const carouselData = json.slice(1, 4);
-      setCarouselData(carouselData);
-      setData(json);
-      setFilteredData(json);
+      setCarouselData(json.slice(0, 3));
     } catch (error) {
       setError(error);
     } finally {
@@ -56,7 +56,31 @@ const Home = () => {
       setRefreshing(false);
     }
   };
-
+  useEffect(() => {
+    fetchCorouselData()
+  }, [])
+  const fetchData = async () => {
+    setLoading(true);
+    setRefreshing(page === 1);
+    try {
+      const categoryQuery = selectedFilters.length > 0 ? `&category=${selectedFilters.join(',')}` : '';
+      const response = await fetch(
+        `http://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=20&page=${page}${categoryQuery}`
+      );
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const json = await response.json();
+      setData((prevData) => [...prevData, ...json]);
+      setFilteredData((prevData) => [...prevData, ...json]);
+      setHasMore(json.length >= 20); // Check if there are more items
+    } catch (error) {
+      setError(error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
   useEffect(() => {
     handleSearch();
   }, [query]);
@@ -92,20 +116,16 @@ const Home = () => {
     });
   };
 
-  const renderItem = React.useCallback(({ item }) => (
+  const CorouselCard = React.useCallback(({ item }) => (
     <View style={styles.itemContainer}>
-      <TouchableOpacity onPress={() => {
-        router.push(`/details/${item.ID}`);
-      }}>
-        <Image
-          source={{ uri: item?.featured_image?.medium_large }}
-          style={styles.image}
-        />
-        <LinearGradient
-          colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
-          style={styles.background}
-        />
-      </TouchableOpacity>
+      <Image
+        source={{ uri: item?.featured_image?.medium_large }}
+        style={styles.image}
+      />
+      <LinearGradient
+        colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
+        style={styles.background}
+      />
       <View style={styles.textContainer}>
         <Text className='bg-secondary-100 text-slate-50 p-2 rounded-3xl font-semibold self-start my-0 opacity-80 text-xs'>{item?.categories[0]?.name}</Text>
         <Text style={styles.text} numberOfLines={2}
@@ -118,7 +138,7 @@ const Home = () => {
   ), [router]);
 
   const headerComponent = () => (
-    <View className="mt-6">
+    <View className="mt-2">
       <View className='flex flex-row justify-between m-2'>
         <View className='flex flex-row items-end'>
           <Text className='text-secondary-100 text-4xl'>S</Text>
@@ -145,12 +165,18 @@ const Home = () => {
         style={[
           styles.searchContainer,
           {
-            opacity: searchVisible || searchFocused ? 1 : 0,
-            height: searchVisible || searchFocused ? 60 : 0,
-            transform: [{ translateY: searchVisible || searchFocused ? 0 : -60 }],
+            height: searchBarHeight,
+            opacity: searchBarOpacity,
+            transform: [{
+              translateY: searchBarHeight.interpolate({
+                inputRange: [0, 60],
+                outputRange: [-60, 0],
+              })
+            }],
           }
         ]}
       >
+
         <SearchInput
           placeholder="Search..."
           query={query}
@@ -172,15 +198,17 @@ const Home = () => {
           autoPlay={true}
           autoPlayInterval={2000}
           showPagination={true}
-          renderItem={renderItem}
+          renderItem={({ item }) => (
+            <CorouselCard key={item.ID} item={item} /> // Ensure unique key here
+          )}
+          onScrollBegin={() => setIsCarouselScrolling(true)} // Disable vertical scroll
+          onScrollEnd={() => setIsCarouselScrolling(false)}
         />
       </ScrollView>
     </View>
   );
 
-  const onRefresh = useCallback(() => {
-    fetchData(selectedFilters);
-  }, [selectedFilters]);
+
 
   const debouncedHandleScroll = debounce((event) => {
     const currentOffset = event.nativeEvent.contentOffset.y;
@@ -195,39 +223,50 @@ const Home = () => {
 
     prevScrollY.current = currentOffset;
   }, 100);
+  const animateSearchBar = (visible) => {
+    Animated.parallel([
+      Animated.timing(searchBarHeight, {
+        toValue: visible ? 60 : 0,
+        duration: 300,
+        useNativeDriver: false,
+      }),
+      Animated.timing(searchBarOpacity, {
+        toValue: visible ? 1 : 0,
+        duration: 300,
+        useNativeDriver: false,
+      }),
+    ]).start();
+  };
 
   const handleScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { y: scrollY } } }],
     {
       useNativeDriver: false,
       listener: (event) => {
-        // Ensure event and event.nativeEvent are not null
         if (event && event.nativeEvent) {
           const currentOffset = event.nativeEvent.contentOffset.y;
-
-          // Ensure prevScrollY.current is defined
           if (prevScrollY.current !== undefined) {
-            if (currentOffset > prevScrollY.current) {
-              // Scrolling down
-              if (!searchFocused) {
-                setSearchVisible(false);
-              }
+            if (currentOffset > prevScrollY.current && !searchFocused) {
+              animateSearchBar(false); // Hide search bar smoothly
             } else {
-              // Scrolling up
-              setSearchVisible(true);
+              animateSearchBar(true);  // Show search bar smoothly
             }
-
-            // Update previous scroll position
             prevScrollY.current = currentOffset;
           }
         }
       },
     }
   );
+  const handleLoadMore = debounce(() => {
+    if (!hasMore || loading) return;
+    setPage((prevPage) => prevPage + 1);
+  }, 200);
+
+
 
   return (
     <SafeAreaView className="flex-1 bg-primary">
-      {loading ? (
+      {loading && data.length === 0 ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#fff" />
         </View>
@@ -246,17 +285,24 @@ const Home = () => {
               <Text className="text-gray-100 text-lg">No data available</Text>
             </View>
           )}
+          ListFooterComponent={
+            loading && hasMore && filteredData.length > 0 ? ( // Show loader at the end
+              <View className="flex-1 justify-center items-center p-4">
+                <ActivityIndicator size="large" color="#fff" />
+              </View>
+            ) : null
+          }
           keyboardShouldPersistTaps="always"
           keyboardDismissMode="on-drag"
           refreshing={refreshing}
-          onRefresh={onRefresh}
-
-
-
-
-
+          onRefresh={() => {
+            setPage(1);  // Reset page
+            fetchData();  // Fetch new data
+          }}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.2}
           onScroll={handleScroll}
-
+          scrollEnabled={!isCarouselScrolling}  // Disable scroll when carousel is active
         />
       )}
     </SafeAreaView>
@@ -287,8 +333,8 @@ const styles = StyleSheet.create({
   textContainer: {
     position: 'absolute',
     bottom: 20,
-    left: 30,
-    right: 30,
+    left: 20,
+    right: 20,
     lineHeight: 32
   },
   text: {
@@ -308,4 +354,3 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 });
-

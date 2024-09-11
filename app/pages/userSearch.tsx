@@ -139,36 +139,46 @@ export default function UserSearch() {
   }
 
   const SearchInputComponent = () => (
-    <View className='flex flex-col gap-2 mx-3'>
-      <View>
-        <SearchInput
-          placeholder="Search by Batch"
-          query={batch}
-          setQuery={setBatch}
-          onSearch={handleBatchSearch}
-        />
+    <>
+      <View className='mt-0 px-4'>
+        <View className='flex flex-row items-end'>
+          <Text className='text-secondary-100 text-4xl'>S</Text>
+          <Text className="font-semibold text-3xl text-gray-100">arvail</Text>
+        </View>
+        <Text className="font-semibold text-gray-100 text-lg mb-3">People</Text>
       </View>
-      <View>
-        <SearchInput
-          placeholder="Search by Name"
-          query={name}
-          setQuery={setName}
-          onSearch={handleNameSearch}
-        />
+      <View className='flex flex-col gap-2 mx-3'>
+        <View>
+          <SearchInput
+            placeholder="Search by Batch"
+            query={batch}
+            setQuery={setBatch}
+            onSearch={handleBatchSearch}
+          />
+        </View>
+        <View>
+          <SearchInput
+            placeholder="Search by Name"
+            query={name}
+            setQuery={setName}
+            onSearch={handleNameSearch}
+          />
+        </View>
+        <View>
+          <SearchInput
+            placeholder="Search by Profession"
+            query={profession}
+            setQuery={setProfession}
+            onSearch={handleProfessionSearch}
+          />
+        </View>
       </View>
-      <View>
-        <SearchInput
-          placeholder="Search by Profession"
-          query={profession}
-          setQuery={setProfession}
-          onSearch={handleProfessionSearch}
-        />
-      </View>
-    </View>
+    </>
+
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView className='bg-primary flex-1'>
       <FlatList
         data={filteredData}
         keyExtractor={(item) => item?.id?.toString()}

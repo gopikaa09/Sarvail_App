@@ -125,7 +125,7 @@ export default function PeopleDetails() {
 
 
   const handleBackStep = () => {
-    router.push('peoples')
+    router.push('people')
   }
   return (
     <SafeAreaView style={styles.container}>
@@ -174,7 +174,7 @@ export default function PeopleDetails() {
           />
         )}
       />
-      <StatusBar barStyle="light-content" />
+      <StatusBar backgroundColor='#161622' style='light' />
     </SafeAreaView>
   );
 }

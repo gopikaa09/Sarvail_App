@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Image, Text, View, ActivityIndicator, StatusBar, TouchableOpacity, Platform, Dimensions } from 'react-native';
+import { Image, Text, View, ScrollView, Dimensions, ActivityIndicator, StatusBar, StyleSheet } from 'react-native';
 import RenderHTML from 'react-native-render-html';
 import { LinearGradient } from 'expo-linear-gradient';
-import Icons from 'react-native-vector-icons/Entypo';
-import { ImageHeaderScrollView, TriggeringView } from 'react-native-image-header-scroll-view';
-
+import Badge from '@/components/Badge';
+import { icons } from '@/constants';
 const { width } = Dimensions.get('window');
+import Icons from 'react-native-vector-icons/Entypo';
+import Icons2 from 'react-native-vector-icons/AntDesign';
+
 
 const Details = () => {
   const { ID } = useLocalSearchParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const router = useRouter();
+  const router = useRouter()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,7 +37,6 @@ const Details = () => {
 
     fetchData();
   }, [ID]);
-
   const formattedDate = new Date(data?.post_date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -43,80 +44,53 @@ const Details = () => {
   });
 
   const handleBackStep = () => {
-    console.log('Back button pressed');
-    try {
-      router.back();
-    } catch (error) {
-      console.error('Error navigating back:', error);
-    }
-  };
-
-
-  const MIN_HEIGHT = Platform.OS === 'ios' ? 90 : 55;
-  const MAX_HEIGHT = 350;
-
+    router.push('home')
+  }
   return (
-    <SafeAreaView className="flex-1 bg-primary">
-      {loading ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#fff" />
-        </View>
-      ) : error ? (
-        <View className="flex-1 justify-center items-center">
-          <Text className="text-red-600 text-lg text-center">Error: {error.message}</Text>
-        </View>
-      ) : (
-        data && (
-          <ImageHeaderScrollView
-            maxHeight={MAX_HEIGHT}
-            minHeight={MIN_HEIGHT}
-            renderHeader={() => (
-              <View className="w-full h-full overflow-hidden justify-center items-center relative">
-                <Image
-                  source={{ uri: data?.featured_image?.large }}
-                  className="w-full h-full"
-                  resizeMode="cover"
-                />
-                <LinearGradient
-                  colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
 
-                  className="absolute bottom-0 w-full h-full"
-                />
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: 20,
-                    left: 20,
-                    zIndex: 100,
-                    pointerEvents: 'box-none', // Ensures this view doesn't block touch events
-                  }}
-                >
-                  <TouchableOpacity
-                    onPress={() => console.log('Test Button Pressed')}
-                    style={{
-                      backgroundColor: 'blue',
-                      padding: 20,
-                      borderRadius: 10,
-                    }}
-                  >
-                    <Text style={{ color: 'white' }}>Test Button</Text>
-                  </TouchableOpacity>
+        {loading ? (
+          <View style={styles.centered}>
+            <ActivityIndicator size="large" color="#fff" />
+          </View>
+        ) : error ? (
+          <View style={styles.centered}>
+            <Text style={styles.errorText}>Error: {error.message}</Text>
+          </View>
+        ) : (
+          data && (
+            <View style={styles.contentContainer} className='bg-primary'>
+              {data?.featured_image?.large ? (
+                <View style={styles.imageContainer}>
+                  <Image
+                    source={{ uri: data.featured_image.large }}
+                    style={styles.image}
+                    resizeMode="cover"
+                  />
+                  <LinearGradient
+                    colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
+                    style={styles.gradient}
+                  />
+                  <View style={styles.imageText} className='flex flex-col'>
+                    <View className='self-start bg-gray-600 opacity-60 p-2 rounded-3xl relative -top-44' >
+                      <Icons name="chevron-left" className="bg-slate-600 p-3 self-start" size={20} color="white" onPress={handleBackStep} />
+                    </View>
+                    <Text className='bg-secondary-100 text-slate-50 p-2 rounded-3xl font-semibold self-start my-0 opacity-80 text-xs'>{data?.categories[0]?.name}</Text>
+                    <Text className='text-slate-50 text-2xl font-semibold leading-6 mt-1' numberOfLines={2}>{data?.post_title}</Text>
+                    <View className='flex flex-row items-center gap-1'>
+                      <Icons2 name="clockcircleo" className="bg-slate-600 p-3 self-start" size={12} color="white" onPress={handleBackStep} />
+                      <Text className='text-slate-100 text-sm mt-1'>{formattedDate}</Text>
+                    </View>
+                  </View>
+                </View>
+              ) : (
+                <Text style={styles.errorText}>Image not available</Text>
+              )}
 
-                </View>
-                <View className="absolute bottom-4 left-2 self-start">
-                  <Text className="bg-secondary-100 text-gray-100 p-2 rounded-full font-semibold mb-2 self-start">
-                    {data?.categories[0]?.name}
-                  </Text>
-                  <Text className="text-gray-100 text-2xl font-bold mb-1" numberOfLines={2}>
-                    {data?.post_title}
-                  </Text>
-                  <Text className="text-gray-100 text-sm">{formattedDate}</Text>
-                </View>
-              </View>
-            )}
-          >
-            <TriggeringView className='bg-primary'>
-              <View className='bg-primary px-4 pt-5 rounded-t-3xl relative z-1 -mt-3'>
+              {/* Render HTML content */}
+              <View className='bg-primary' style={styles.description}>
+
                 {data.post_content && (
                   <RenderHTML
                     contentWidth={Dimensions.get('window').width}
@@ -125,12 +99,12 @@ const Details = () => {
                   />
                 )}
               </View>
-            </TriggeringView>
-          </ImageHeaderScrollView >
-        )
-      )}
-      <StatusBar barStyle="dark-content" />
-    </SafeAreaView >
+            </View>
+          )
+        )}
+      </ScrollView>
+      <StatusBar backgroundColor='#161622' style='light' />
+    </View>
   );
 };
 
@@ -139,7 +113,7 @@ const tagsStyles = {
     marginVertical: 8,
     fontSize: 16,
     lineHeight: 24,
-    color: '#E2E8F0',
+    color: '#E2E8F0'
   },
   ul: {
     marginVertical: 1,
@@ -159,7 +133,63 @@ const tagsStyles = {
   },
   a: {
     color: 'white',
-  },
+  }
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#1E293B',
+  },
+  scrollViewContent: {
+    paddingHorizontal: 0,
+    alignItems: 'center',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  contentContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imageContainer: {
+    width: width,
+    height: 400,
+    // borderRadius: 0,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  gradient: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+  },
+  imageText: {
+    position: 'absolute',
+    bottom: 45,
+    left: 10,
+  },
+  description: {
+    borderTopRightRadius: 40,
+    borderTopLeftRadius: 40,
+    paddingHorizontal: 30,
+    paddingVertical: 20,
+    position: 'relative',
+    top: -30
+  }
+});
 
 export default Details;

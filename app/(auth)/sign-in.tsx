@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, useRouter } from 'expo-router';
@@ -12,6 +12,9 @@ const SignIn = () => {
     email: '',
     password: '',
   });
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState<String>('')
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const passwordRef = useRef(null);
@@ -58,7 +61,7 @@ const SignIn = () => {
       // Save user data to local storage
       await SimpleStore.save('user', userData);
       await SimpleStore.save('loggedIn', true);
-      console.log(userData);
+      // console.log(userData);
 
       Alert.alert("Success", "User signed in successfully");
       router.replace("/home");
@@ -68,6 +71,21 @@ const SignIn = () => {
       setIsSubmitting(false);
     }
   };
+
+  const getUser = async () => {
+    try {
+      const storedUser = await SimpleStore.get('user');
+      setUser(storedUser);
+      setToken(storedUser?.token)
+    } catch (err) {
+      console.error('Failed to get user from SimpleStore', err);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
+
 
   return (
     <KeyboardAvoidingView className='flex-1'
@@ -102,7 +120,6 @@ const SignIn = () => {
               })}
               otherStyles="mt-7"
               placeholder="Enter Password"
-              secureTextEntry={true}
               onSubmitEditing={handlePasswordSubmit} // Submit form
             />
             <CustomButton

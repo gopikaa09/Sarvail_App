@@ -58,8 +58,9 @@ const ImageCard = ({ item }) => {
         {/* Optional menu icon or other elements */}
       </View>
       <TouchableOpacity
-        activeOpacity={0.7}
+        activeOpacity={0.8}
         onPress={handlePress}
+        delayPressIn={150}
         className="w-full h-48 rounded-xl mt-1 relative flex justify-center items-center"
       >
         <Image
@@ -69,14 +70,14 @@ const ImageCard = ({ item }) => {
         />
       </TouchableOpacity>
       <TouchableOpacity onPress={handlePress}>
-        <View className="ml-0 gap-y-1 mt-2"  >
-          <Text className="font-psemibold text-lg text-white" numberOfLines={2}>
+        <View className="ml-0 mt-2"  >
+          <Text className="font-psemibold text-lg text-white leading-6" numberOfLines={2}>
             {item?.post_title}
           </Text>
         </View>
       </TouchableOpacity>
 
-      <View className='flex flex-row justify-between my-2'>
+      <View className='flex flex-row justify-between my-1'>
         <Text className='text-gray-400 text-sm'>{formattedDate}</Text>
         <Icons name="sharealt" size={15} color="white" onPress={handleShare} />
       </View>

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View, RefreshControl } from 'react-native';
+import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TouchableOpacity, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SimpleStore from 'react-native-simple-store';
 import FormField from '@/components/FormField';
 import CustomButton from '@/components/CustomButton';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import Icons from 'react-native-vector-icons/EvilIcons';
 import * as ImagePicker from 'expo-image-picker';
+import SimpleStore from 'react-native-simple-store';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -26,7 +26,8 @@ const Profile = () => {
     ds_profession: ''
   });
   const [token, setToken] = useState('');
-  const [profileImage, setProfileImage] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -35,32 +36,37 @@ const Profile = () => {
 
   const fetchUserData = async () => {
     try {
-      const storedUser = await SimpleStore.get('user');
-      console.log("storedUser", storedUser);
+      const User = await SimpleStore.get('user');
+      const storedToken = User?.token;
+      if (!storedToken) {
+        console.warn('No token found in SimpleStore');
+        return;
+      }
 
-      if (storedUser) {
-        const userData = storedUser.user;
-        const userMetaData = storedUser.user_meta;
+      setToken(storedToken);
+      const response = await axios.get('http://sarvail.net/wp-json/ds-custom_endpoints/v1/me', {
+        headers: {
+          'Api-Token': `Bearer ${storedToken}`,
+        },
+      });
 
-        setUser(storedUser);
-
+      if (response.status === 200) {
+        const userData = response.data;
+        setUser(userData);
         setForm({
-          username: userData.user_nicename || '',
-          first_name: userMetaData.first_name || '',
-          last_name: userMetaData.last_name || '',
-          ds_batch: userData.ds_batch || '',
-          user_email: userData.user_email || '',
-          ds_res_mobile: userMetaData.ds_res_mobile || '',
-          country_code: userMetaData.country_code || '',
+          username: userData.user.user_nicename || '',
+          first_name: userData.user_meta.first_name || '',
+          last_name: userData.user_meta.last_name || '',
+          ds_batch: userData.user.ds_batch || '',
+          user_email: userData.user.user_email || '',
+          ds_res_mobile: userData.user_meta.ds_res_mobile || '',
+          country_code: userData.user_meta.country_code || '',
           password: '',
-          ds_profile_pic: userData.ds_profile_pic || '',
-          ds_profession: userMetaData.ds_profession || ''
+          ds_profile_pic: userData.user.ds_profile_pic || '',
+          ds_profession: userData.user_meta.ds_profession || ''
         });
-
-        setToken(storedUser.token || '');
-        setProfileImage(userData.ds_profile_pic || null);
       } else {
-        console.warn('No user data found in SimpleStore');
+        console.warn('Failed to fetch user data');
       }
     } catch (error) {
       console.error('Failed to fetch user data', error);
@@ -74,6 +80,8 @@ const Profile = () => {
 
   const handleLogout = async () => {
     await SimpleStore.save('loggedIn', false);
+    await SimpleStore.save('user', {});
+    await SimpleStore.save('token', '');
     Alert.alert("Success", "Logged out successfully");
     router.replace('/sign-in');
   };
@@ -121,8 +129,13 @@ const Profile = () => {
       );
 
       if (response.status === 200) {
+        const userData = response.data;
+        setForm({
+          ...form,
+          ds_profile_pic: userData.user.ds_profile_pic || '',
+        });
+        setUser(userData);
         Alert.alert('Success', 'Profile picture updated successfully');
-        setProfileImage(response.data.ds_profile_pic);
       } else {
         Alert.alert('Error', 'Failed to update profile picture');
       }
@@ -157,34 +170,18 @@ const Profile = () => {
 
       if (response.status === 200) {
         Alert.alert('Success', 'Profile updated successfully');
-        const updatedUser = {
-          ...user,
-          user: {
-            ...user.user,
-            ds_batch: response.data.user.ds_batch,
-            ds_profile_pic: response.data.user.ds_profile_pic
-          },
-          user_meta: {
-            ...user.user_meta,
-            first_name: response.data.user_meta.first_name,
-            last_name: response.data.user_meta.last_name,
-            ds_res_mobile: response.data.user_meta.ds_res_mobile,
-            country_code: response.data.user_meta.country_code,
-            ds_profession: response.data.user_meta.ds_profession
-          }
-        };
+        const updatedUser = response.data;
         setUser(updatedUser);
         setForm({
           ...form,
-          first_name: response.data.user_meta.first_name,
-          last_name: response.data.user_meta.last_name,
-          ds_batch: response.data.user.ds_batch,
-          ds_res_mobile: response.data.user_meta.ds_res_mobile,
-          country_code: response.data.user_meta.country_code,
-          ds_profession: response.data.user_meta.ds_profession,
-          ds_profile_pic: response.data.user.ds_profile_pic
+          first_name: updatedUser.user_meta.first_name,
+          last_name: updatedUser.user_meta.last_name,
+          ds_batch: updatedUser.user.ds_batch,
+          ds_res_mobile: updatedUser.user_meta.ds_res_mobile,
+          country_code: updatedUser.user_meta.country_code,
+          ds_profession: updatedUser.user_meta.ds_profession,
+          ds_profile_pic: updatedUser.user.ds_profile_pic
         });
-
         await SimpleStore.update('user', updatedUser);
       } else {
         Alert.alert('Error', 'Failed to update profile');
@@ -219,15 +216,17 @@ const Profile = () => {
         }
       >
         <View>
-          <TouchableOpacity onPress={openPicker}>
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
             <Image
-              source={{ uri: profileImage || defaultImage }}
+              source={{ uri: user?.user?.ds_profile_pic || defaultImage }}
               style={{ width: 80, height: 80 }}
               className="rounded-full mt-5"
               resizeMode="cover"
             />
-            <View className='absolute left-14 top-20 bg-black-100 rounded-2xl'>
-              <Icons name="pencil" size={20} color="white" />
+            <View className='absolute left-14 top-20 bg-black-100 rounded-2xl p-0.5 flex items-center justify-center'>
+              <View className='mb-1'>
+                <Icons name="pencil" size={20} color="white" onPress={openPicker} />
+              </View>
             </View>
           </TouchableOpacity>
         </View>
@@ -267,7 +266,7 @@ const Profile = () => {
           value={form.ds_profession}
           handleChangeText={(e) => setForm({ ...form, ds_profession: e })}
           otherStyles="mt-7"
-          placeholder="Enter your Profession.."
+          placeholder="Enter Profession.."
         />
         <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly', width: '100%' }} className='mb-4'>
           <CustomButton
@@ -282,6 +281,25 @@ const Profile = () => {
           />
         </View>
       </ScrollView>
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <TouchableOpacity
+            style={{ flex: 1, width: '100%' }}
+            onPress={() => setModalVisible(false)}
+          >
+            <Image
+              source={{ uri: user?.user?.ds_profile_pic || defaultImage }}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
