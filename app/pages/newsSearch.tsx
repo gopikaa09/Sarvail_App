@@ -15,7 +15,7 @@ export default function NewsSearch() {
     setLoading(true);
     try {
       const response = await fetch(
-        'http://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=200'
+        'https://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=200'
       );
       if (!response.ok) {
         throw new Error('Network response was not ok');

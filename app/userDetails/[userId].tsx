@@ -42,7 +42,7 @@ export default function PeopleDetails() {
       if (!token) return;
 
       try {
-        const response = await fetch(`http://sarvail.net/wp-json/ds-custom_endpoints/v1/users?id=${userId}`, {
+        const response = await fetch(`https://sarvail.net/wp-json/ds-custom_endpoints/v1/users?id=${userId}`, {
           method: 'GET',
           headers: {
             'Api-Token': `Bearer ${token}`

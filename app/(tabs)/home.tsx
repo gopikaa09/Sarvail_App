@@ -42,7 +42,7 @@ const Home = () => {
     setRefreshing(page === 1);
     try {
       const response = await fetch(
-        `http://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=20`
+        `https://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=20`
       );
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -65,7 +65,7 @@ const Home = () => {
     try {
       const categoryQuery = selectedFilters.length > 0 ? `&category=${selectedFilters.join(',')}` : '';
       const response = await fetch(
-        `http://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=20&page=${page}${categoryQuery}`
+        `https://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=20&page=${page}${categoryQuery}`
       );
       if (!response.ok) {
         throw new Error('Network response was not ok');

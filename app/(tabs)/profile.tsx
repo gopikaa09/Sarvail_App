@@ -44,7 +44,7 @@ const Profile = () => {
       }
 
       setToken(storedToken);
-      const response = await axios.get('http://sarvail.net/wp-json/ds-custom_endpoints/v1/me', {
+      const response = await axios.get('https://sarvail.net/wp-json/ds-custom_endpoints/v1/me', {
         headers: {
           'Api-Token': `Bearer ${storedToken}`,
         },
@@ -118,7 +118,7 @@ const Profile = () => {
       });
 
       const response = await axios.post(
-        'http://sarvail.net/wp-json/ds-custom_endpoints/v1/me',
+        'https://sarvail.net/wp-json/ds-custom_endpoints/v1/me',
         formData,
         {
           headers: {

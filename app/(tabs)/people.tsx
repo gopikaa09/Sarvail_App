@@ -54,7 +54,7 @@ const People = () => {
     setRefreshing(true);
     try {
       const response = await axios.get(
-        'http://sarvail.net/wp-json/ds-custom_endpoints/v1/users',
+        'https://sarvail.net/wp-json/ds-custom_endpoints/v1/users',
         {
           headers: {
             'Api-Token': `Bearer ${user.token}`,
@@ -95,7 +95,7 @@ const People = () => {
     } else {
       try {
         const response = await axios.get(
-          `http://sarvail.net/wp-json/ds-custom_endpoints/v1/users?ds_batch=${batch}`,
+          `https://sarvail.net/wp-json/ds-custom_endpoints/v1/users?ds_batch=${batch}`,
           {
             headers: {
               'Api-Token': `Bearer ${user.token}`,
@@ -116,7 +116,7 @@ const People = () => {
     } else {
       try {
         const response = await axios.get(
-          `http://sarvail.net/wp-json/ds-custom_endpoints/v1/users?ds_profession=${profession}`,
+          `https://sarvail.net/wp-json/ds-custom_endpoints/v1/users?ds_profession=${profession}`,
           {
             headers: {
               'Api-Token': `Bearer ${user.token}`,

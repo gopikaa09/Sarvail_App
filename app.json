@@ -1,33 +1,27 @@
 {
   "expo": {
-    "name": "my-app",
-    "slug": "my-app",
+    "name": "Sarvail",
+    "slug": "Sarvail",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "icon": "./assets/icon.png",
+    "scheme": "sarvail",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/logo.png",
+      "image": "./assets/images/logoSarvail.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.galaxies.firebase",
-      "googleServicesFile":"./GoogleService-Info.plist"
-    },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo.png",
+        "foregroundImage": "./assets/SarvailApkLogo.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ],
       "package": "com.galaxies.firebase",
-      "googleServicesFile":"./google-services.json"
-
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -45,12 +39,20 @@
           }
         }
       ],
-      "expo-build-properties",
       "@react-native-firebase/app",
-      "@react-native-firebase/auth"
+      "@react-native-firebase/auth",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "8902ef78-08e2-4be4-a817-fa779fafe6a4"
+      }
     }
   }
 }

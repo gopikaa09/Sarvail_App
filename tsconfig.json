@@ -6,12 +6,16 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "allowJs": true,  // Allows JavaScript files in the project
+    "baseUrl": "."    // Ensure baseUrl is set for paths to resolve correctly
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-, "store/store.js", "store/userSlice.js"  ]
+    "expo-env.d.ts",
+    "store/store.js",
+    "store/userSlice.js"
+  ]
 }

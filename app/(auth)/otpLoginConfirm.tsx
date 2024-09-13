@@ -23,7 +23,7 @@ export default function ConfirmOTP() {
     setIsSubmitting(true);
     try {
       const response = await axios.get(
-        `http://sarvail.net/wp-json/ds-custom_endpoints/v1/login/otp?username=${form.username}`
+        `https://sarvail.net/wp-json/ds-custom_endpoints/v1/login/otp?username=${form.username}`
       );
       if (response.status === 200) {
         setOtpRequested(true);

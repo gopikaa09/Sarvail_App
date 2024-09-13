@@ -21,7 +21,7 @@ const Details = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://sarvail.net/wp-json/ds-custom_endpoints/v1/posts/${ID}`);
+        const response = await fetch(`https://sarvail.net/wp-json/ds-custom_endpoints/v1/posts/${ID}`);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
