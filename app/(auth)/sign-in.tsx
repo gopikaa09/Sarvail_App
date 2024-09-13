@@ -66,7 +66,7 @@ const SignIn = () => {
       Alert.alert("Success", "User signed in successfully");
       router.replace("/home");
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert("Error", "Username or Password is Incorrect");
     } finally {
       setIsSubmitting(false);
     }

@@ -109,6 +109,7 @@ export default function UserSearch() {
     }
   };
 
+
   useEffect(() => {
     handleNameSearch();
   }, [name, data]);

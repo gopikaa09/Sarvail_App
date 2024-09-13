@@ -10,12 +10,13 @@
     "splash": {
       "image": "./assets/images/logoSarvail.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#161622"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/SarvailApkLogo.png",
-        "backgroundColor": "#ffffff"
+        "resizeMode": "contain",
+        "backgroundColor": "#161622"
       },
       "permissions": [
         "android.permission.RECORD_AUDIO"
