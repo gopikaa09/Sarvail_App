@@ -139,7 +139,7 @@ const tagsStyles = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E293B',
+    backgroundColor: '#161622',
   },
   scrollViewContent: {
     paddingHorizontal: 0,

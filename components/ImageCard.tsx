@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { truncateHtml } from '@/hooks/useTruncate';
 import Icons from 'react-native-vector-icons/AntDesign';
 
-const ImageCard = ({ item }) => {
+const ImageCard = ({ item, isScrolling }) => {
   const truncatedContent = truncateHtml(item?.post_content, 150);
   const avatar = item?.post_author === '1'
     ? 'https://media.licdn.com/dms/image/C5603AQGPN1Fj6eXLWQ/profile-displayphoto-shrink_400_400/0/1581546724198?e=2147483647&v=beta&t=ndNnjK31VXbZNDhy-EaxJZd55nt6FTu_ShrEq-Z9_Io'
@@ -50,7 +50,7 @@ const ImageCard = ({ item }) => {
   };
 
   return (
-    <View className="flex flex-col px-4 mb-4">
+    <View className="flex flex-col px-4 mb-4" key={item?.ID}>
       <View className="flex flex-row gap-3 items-start">
         <View className="flex justify-center items-center flex-row flex-1">
           {/* Avatar or additional content */}
@@ -58,8 +58,13 @@ const ImageCard = ({ item }) => {
         {/* Optional menu icon or other elements */}
       </View>
       <TouchableOpacity
+        disabled={isScrolling} // Disable touch during scroll
+        onPress={() => {
+          if (!isScrolling) {
+            router.push(`/details/${item.ID}`);
+          }
+        }}
         activeOpacity={0.8}
-        onPress={handlePress}
         delayPressIn={150}
         className="w-full h-48 rounded-xl mt-1 relative flex justify-center items-center"
       >

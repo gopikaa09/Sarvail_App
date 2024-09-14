@@ -123,6 +123,7 @@ const SignIn = () => {
               onSubmitEditing={handlePasswordSubmit} // Submit form
             />
             <CustomButton
+              textStyles={"text-xl"}
               title="Sign In"
               handlePress={submit}
               isLoading={isSubmitting}

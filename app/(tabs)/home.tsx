@@ -42,7 +42,7 @@ const Home = () => {
     setRefreshing(page === 1);
     try {
       const response = await fetch(
-        `https://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=20`
+        `http://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=20`
       );
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -65,14 +65,23 @@ const Home = () => {
     try {
       const categoryQuery = selectedFilters.length > 0 ? `&category=${selectedFilters.join(',')}` : '';
       const response = await fetch(
-        `https://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=20&page=${page}${categoryQuery}`
+        `http://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=20&page=${page}${categoryQuery}`
       );
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
       const json = await response.json();
-      setData((prevData) => [...prevData, ...json]);
-      setFilteredData((prevData) => [...prevData, ...json]);
+
+      if (page === 1) {
+        // If it's the first page, reset the data and filtered data
+        setData(json);
+        setFilteredData(json);
+      } else {
+        // For subsequent pages, append the new data
+        setData((prevData) => [...prevData, ...json]);
+        setFilteredData((prevData) => [...prevData, ...json]);
+      }
+
       setHasMore(json.length >= 20); // Check if there are more items
     } catch (error) {
       setError(error);
@@ -81,6 +90,13 @@ const Home = () => {
       setRefreshing(false);
     }
   };
+
+  const handleFilters = (category) => {
+    setSelectedFilters([category]);
+    setPage(1);  // Reset page to 1 for new filter
+    fetchData(); // Fetch data based on new filter
+  };
+
   useEffect(() => {
     handleSearch();
   }, [query]);
@@ -106,15 +122,6 @@ const Home = () => {
     { value: 'help-sarvailians', label: 'Help Sarvailians' },
   ];
 
-  const handleFilters = (category) => {
-    setSelectedFilters((prevSelected) => {
-      if (prevSelected.includes(category)) {
-        return prevSelected.filter((item) => item !== category);
-      } else {
-        return [...prevSelected, category];
-      }
-    });
-  };
 
   const CorouselCard = React.useCallback(({ item }) => (
     <View style={styles.itemContainer}>
@@ -278,7 +285,11 @@ const Home = () => {
         <FlatList
           data={filteredData}
           keyExtractor={(item) => item.ID.toString()}
-          renderItem={({ item }) => <ImageCard item={item} />}
+          renderItem={({ item }) => (
+            <View key={item?.ID}>
+              <ImageCard item={item} />
+            </View>
+          )}
           ListHeaderComponent={headerComponent()}
           ListEmptyComponent={() => (
             <View className="flex-1 justify-center items-center">

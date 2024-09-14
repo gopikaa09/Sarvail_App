@@ -31,6 +31,10 @@ const SignUp = () => {
   const passwordRef = useRef(null);
 
   const submit = async () => {
+    if (form.first_name === "" || form.username === "" || form.ds_batch === "" || form.email === "" || form.ds_res_mobile === "" || form.password === "") {
+      Alert.alert("Error", "Please fill required fields");
+      return; // Exit early if fields are not filled
+    }
     console.log(form);
     setisSubmitting(true);
     try {
@@ -53,7 +57,7 @@ const SignUp = () => {
         throw new Error('Invalid username or password');
       }
       if (response.status === 200) {
-        Alert.alert("Success", "User registered successfully");
+        Alert.alert("Success", "User registered successfully Please Confirm your OTP");
         router.replace("/otpRegisterConfirm");
       }
     } catch (error) {
@@ -74,7 +78,11 @@ const SignUp = () => {
           <Text className='text-white text-2xl'>Sign up to Sarvail</Text>
 
           <FormField
-            title="Username"
+            title={
+              <>
+                <Text className='text-red-500 '>*</Text>Username
+              </>
+            }
             value={form.username}
             handleChangeText={(e) => setForm({ ...form, username: e })}
             otherStyles="mt-7"
@@ -83,7 +91,11 @@ const SignUp = () => {
           />
           <FormField
             ref={firstNameRef}
-            title="First Name"
+            title={
+              <>
+                <Text className='text-red-500 '>*</Text>First Name
+              </>
+            }
             value={form.first_name}
             handleChangeText={(e) => setForm({ ...form, first_name: e })}
             otherStyles="mt-7"
@@ -101,7 +113,11 @@ const SignUp = () => {
           />
           <FormField
             ref={batchRef}
-            title="Batch"
+            title={
+              <>
+                <Text className='text-red-500 '>*</Text>Batch
+              </>
+            }
             value={form.ds_batch}
             handleChangeText={(e) => setForm({ ...form, ds_batch: e })}
             otherStyles="mt-7"
@@ -110,7 +126,11 @@ const SignUp = () => {
           />
           <FormField
             ref={emailRef}
-            title="Email"
+            title={
+              <>
+                <Text className='text-red-500 '>*</Text>Email
+              </>
+            }
             value={form.email}
             handleChangeText={(e) => setForm({ ...form, email: e })}
             otherStyles="mt-7"
@@ -120,8 +140,11 @@ const SignUp = () => {
           />
           <FormField
             ref={mobileRef}
-            title="Mobile Number"
-            value={form.ds_res_mobile}
+            title={
+              <>
+                <Text className='text-red-500 '>*</Text>Mobile Number
+              </>
+            }
             handleChangeText={(e) => setForm({ ...form, ds_res_mobile: e })}
             otherStyles="mt-7"
             placeholder="Enter Mobile Number"
@@ -138,7 +161,11 @@ const SignUp = () => {
           />
           <FormField
             ref={passwordRef}
-            title="Password"
+            title={
+              <>
+                <Text className='text-red-500 '>*</Text>Password
+              </>
+            }
             value={form.password}
             handleChangeText={(e) => setForm({ ...form, password: e })}
             otherStyles="mt-7"

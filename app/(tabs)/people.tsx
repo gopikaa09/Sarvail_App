@@ -13,13 +13,13 @@ const People = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [searchVisible, setSearchVisible] = useState(false); // Start with false
+  const [searchVisible, setSearchVisible] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [batch, setBatch] = useState('');
   const [name, setName] = useState('');
   const [profession, setProfession] = useState('');
   const [user, setUser] = useState(null);
-  const searchBarHeight = useRef(new Animated.Value(0)).current;  // Animation for height and translateY
+  const searchBarHeight = useRef(new Animated.Value(0)).current;
   const searchBarOpacity = useRef(new Animated.Value(0)).current;
   const scrollY = useRef(new Animated.Value(0)).current;
   const prevScrollY = useRef(0);
@@ -38,16 +38,43 @@ const People = () => {
   }, []);
 
   useEffect(() => {
-    handleNameSearch();
-  }, [name, data]);
+    if (user?.token) {
+      fetchData();
+    }
+  }, [user]);
 
+  // Refactored filtering logic: Apply all filters together
   useEffect(() => {
-    handleBatchSearch();
-  }, [batch]);
+    applyFilters();
+  }, [batch, name, profession, data]);
 
-  useEffect(() => {
-    handleProfessionSearch();
-  }, [profession]);
+  const applyFilters = () => {
+    let filtered = data;
+
+    // Apply batch filter
+    if (batch.trim()) {
+      filtered = filtered.filter(user =>
+        user?.ds_batch?.toLowerCase().includes(batch.toLowerCase())
+      );
+    }
+
+    // Apply name filter
+    if (name.trim()) {
+      filtered = filtered.filter(user =>
+        user?.user_nicename?.toLowerCase().includes(name.toLowerCase())
+      );
+    }
+
+    // Apply profession filter
+    if (profession.trim()) {
+      filtered = filtered.filter(user =>
+        user?.ds_profession?.toLowerCase().includes(profession.toLowerCase())
+      );
+    }
+
+    // Set the filtered data
+    setFilteredData(filtered);
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -62,7 +89,7 @@ const People = () => {
         }
       );
       setData(response.data);
-      setFilteredData(response.data);
+      setFilteredData(response.data); // Set both data and filteredData
     } catch (error) {
       setError(error);
       Alert.alert('Error', 'Failed to fetch data');
@@ -72,64 +99,6 @@ const People = () => {
     }
   };
 
-  useEffect(() => {
-    if (user?.token) {
-      fetchData();
-    }
-  }, [user]);
-
-  const handleNameSearch = () => {
-    if (name.trim() === '') {
-      setFilteredData(data);
-    } else {
-      const filtered = data.filter(user =>
-        user?.user_nicename?.toLowerCase().includes(name.toLowerCase())
-      );
-      setFilteredData(filtered);
-    }
-  };
-
-  const handleBatchSearch = async () => {
-    if (batch.trim() === '') {
-      setFilteredData(data);
-    } else {
-      try {
-        const response = await axios.get(
-          `https://sarvail.net/wp-json/ds-custom_endpoints/v1/users?ds_batch=${batch}`,
-          {
-            headers: {
-              'Api-Token': `Bearer ${user.token}`,
-            },
-          }
-        );
-        setFilteredData(response.data);
-      } catch (error) {
-        setError(error);
-        Alert.alert('Error', 'Failed to fetch data for batch search');
-      }
-    }
-  };
-
-  const handleProfessionSearch = async () => {
-    if (profession.trim() === '') {
-      setFilteredData(data);
-    } else {
-      try {
-        const response = await axios.get(
-          `https://sarvail.net/wp-json/ds-custom_endpoints/v1/users?ds_profession=${profession}`,
-          {
-            headers: {
-              'Api-Token': `Bearer ${user.token}`,
-            },
-          }
-        );
-        setFilteredData(response.data);
-      } catch (error) {
-        setError(error);
-        Alert.alert('Error', 'Failed to fetch data for profession search');
-      }
-    }
-  };
   const animateSearchBar = (visible) => {
     Animated.parallel([
       Animated.timing(searchBarHeight, {
@@ -175,7 +144,7 @@ const People = () => {
               placeholder="Search by Batch"
               query={batch}
               setQuery={setBatch}
-              onSearch={handleBatchSearch}
+              onSearch={() => applyFilters()} // Trigger filtering when searching
             />
           </View>
           <View>
@@ -183,7 +152,7 @@ const People = () => {
               placeholder="Search by Name"
               query={name}
               setQuery={setName}
-              onSearch={handleNameSearch}
+              onSearch={() => applyFilters()} // Trigger filtering when searching
             />
           </View>
           <View>
@@ -191,14 +160,13 @@ const People = () => {
               placeholder="Search by Profession"
               query={profession}
               setQuery={setProfession}
-              onSearch={handleProfessionSearch}
+              onSearch={() => applyFilters()} // Trigger filtering when searching
             />
           </View>
         </View>
       </Animated.View>
     </>
   );
-
 
   const handleScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { y: scrollY } } }],
