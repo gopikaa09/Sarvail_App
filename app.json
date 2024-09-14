@@ -15,7 +15,6 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/SarvailApkLogo.png",
-        "resizeMode": "contain",
         "backgroundColor": "#161622"
       },
       "permissions": [

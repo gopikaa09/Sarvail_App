@@ -42,7 +42,7 @@ const Home = () => {
     setRefreshing(page === 1);
     try {
       const response = await fetch(
-        `http://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=20`
+        `https://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=20`
       );
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -63,9 +63,12 @@ const Home = () => {
     setLoading(true);
     setRefreshing(page === 1);
     try {
-      const categoryQuery = selectedFilters.length > 0 ? `&category=${selectedFilters.join(',')}` : '';
+      const categoryQuery = selectedFilters.length > 0 ? `&category=${selectedFilters[0]}` : '';
+      console.log('====================================');
+      console.log(categoryQuery);
+      console.log('====================================');
       const response = await fetch(
-        `http://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=20&page=${page}${categoryQuery}`
+        `https://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=20&page=${page}${categoryQuery}`
       );
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -115,7 +118,7 @@ const Home = () => {
   const TopFilters = [
     { value: 'alumni-news', label: 'Alumni News' },
     { value: 'know-sarvalians', label: 'Know Sarvalians' },
-    { value: 'reunions', label: 'Reunions' },
+    { value: 'renuions', label: 'Reunions' },
     { value: 'events', label: 'Events' },
     { value: 'school-news', label: 'School News' },
     { value: 'school-development', label: 'School Development' },
