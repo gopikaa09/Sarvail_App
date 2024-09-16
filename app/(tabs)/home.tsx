@@ -95,10 +95,22 @@ const Home = () => {
   };
 
   const handleFilters = (category) => {
-    setSelectedFilters([category]);
-    setPage(1);  // Reset page to 1 for new filter
-    fetchData(); // Fetch data based on new filter
+    // Check if the selected filter is already applied
+    if (selectedFilters.includes(category)) {
+      // If already selected, remove the filter (deselect)
+      setSelectedFilters([]);
+    } else {
+      // If not selected, apply the new filter (select)
+      setSelectedFilters([category]);
+    }
+
+    // Reset page to 1 when the filter changes
+    setPage(1);
+
+    // Fetch the filtered data
+    fetchData();
   };
+
 
   useEffect(() => {
     handleSearch();
@@ -170,7 +182,6 @@ const Home = () => {
           </View>
         </ScrollView>
       </View>
-
       <Animated.View
         style={[
           styles.searchContainer,

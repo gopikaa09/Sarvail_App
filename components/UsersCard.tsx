@@ -9,11 +9,12 @@ export default function UsersCard({ user }) {
     navigate.push(`/userDetails/${user.id}`); // Adjust to your details page route
   };
   return (
-    <View className="flex-row items-center bg-black-100 p-4 rounded-2xl my-2 mx-4 border-black-200"
+    <TouchableOpacity
+      onPress={handlePress}
     >
-      <TouchableOpacity
-        onPress={handlePress}
+      <View className="flex-row items-center bg-black-100 p-4 rounded-2xl my-2 mx-4 border-black-200"
       >
+
         {/* Avatar with Initial */}
         {
           user?.ds_profile_pic ? <>
@@ -32,23 +33,18 @@ export default function UsersCard({ user }) {
               </View>
             </>
         }
-      </TouchableOpacity>
 
-
-      <TouchableOpacity
-        onPress={handlePress}
-      >
         <View className="ml-4">
           <Text className="text-base font-semibold text-slate-100"
-            onPress={handlePress}
           >{user?.user_display_name}</Text>
           {/* <Text className="text-sm text-slate-600">{user?.user_email}</Text> */}
           <Text className="text-sm text-slate-200">{user?.ds_profession}</Text>
           <Text className="text-sm text-slate-200">{user?.ds_batch}</Text>
         </View>
-      </TouchableOpacity>
 
-    </View>
+      </View>
+    </TouchableOpacity>
+
   );
 }
 

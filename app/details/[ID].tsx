@@ -20,6 +20,7 @@ const Details = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true)
       try {
         const response = await fetch(`https://sarvail.net/wp-json/ds-custom_endpoints/v1/posts/${ID}`);
         if (!response.ok) {
@@ -46,12 +47,14 @@ const Details = () => {
   const handleBackStep = () => {
     router.push('home')
   }
+  console.log('====================================');
+  console.log(loading);
+  console.log('====================================');
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-
         {loading ? (
-          <View style={styles.centered}>
+          <View style={styles.loaderContainer}>
             <ActivityIndicator size="large" color="#fff" />
           </View>
         ) : error ? (
@@ -189,7 +192,13 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     position: 'relative',
     top: -30
-  }
+  },
+  loaderContainer: {
+    flex: 1, // Fill available space
+    justifyContent: 'center',
+    alignItems: 'center', // Center the loader horizontally
+    backgroundColor: '#161622', // Same background as the parent
+  },
 });
 
 export default Details;
