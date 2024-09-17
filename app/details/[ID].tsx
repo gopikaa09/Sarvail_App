@@ -10,17 +10,16 @@ const { width } = Dimensions.get('window');
 import Icons from 'react-native-vector-icons/Entypo';
 import Icons2 from 'react-native-vector-icons/AntDesign';
 
-
 const Details = () => {
   const { ID } = useLocalSearchParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true)
+      setLoading(true);
       try {
         const response = await fetch(`https://sarvail.net/wp-json/ds-custom_endpoints/v1/posts/${ID}`);
         if (!response.ok) {
@@ -38,6 +37,7 @@ const Details = () => {
 
     fetchData();
   }, [ID]);
+
   const formattedDate = new Date(data?.post_date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -45,25 +45,23 @@ const Details = () => {
   });
 
   const handleBackStep = () => {
-    router.push('home')
-  }
-  console.log('====================================');
-  console.log(loading);
-  console.log('====================================');
+    router.push('home');
+  };
+
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        {loading ? (
-          <View style={styles.loaderContainer}>
-            <ActivityIndicator size="large" color="#fff" />
-          </View>
-        ) : error ? (
-          <View style={styles.centered}>
-            <Text style={styles.errorText}>Error: {error.message}</Text>
-          </View>
-        ) : (
-          data && (
-            <View style={styles.contentContainer} className='bg-primary'>
+    <View className="bg-primary flex-1">
+      {loading ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      ) : error ? (
+        <View style={styles.centered}>
+          <Text style={styles.errorText}>Error: {error.message}</Text>
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          {data && (
+            <View style={styles.contentContainer} className="bg-primary">
               {data?.featured_image?.large ? (
                 <View style={styles.imageContainer}>
                   <Image
@@ -75,15 +73,19 @@ const Details = () => {
                     colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
                     style={styles.gradient}
                   />
-                  <View style={styles.imageText} className='flex flex-col'>
-                    <View className='self-start bg-gray-600 opacity-60 p-2 rounded-3xl relative -top-44' >
-                      <Icons name="chevron-left" className="bg-slate-600 p-3 self-start" size={20} color="white" onPress={handleBackStep} />
+                  <View style={styles.imageText} className="flex flex-col">
+                    <View className="self-start bg-gray-600 opacity-60 p-2 rounded-3xl relative -top-44">
+                      <Icons name="chevron-left" size={20} color="white" onPress={handleBackStep} />
                     </View>
-                    <Text className='bg-secondary-100 text-slate-50 p-2 rounded-3xl font-semibold self-start my-0 opacity-80 text-xs'>{data?.categories[0]?.name}</Text>
-                    <Text className='text-slate-50 text-2xl font-semibold leading-6 mt-1' numberOfLines={2}>{data?.post_title}</Text>
-                    <View className='flex flex-row items-center gap-1'>
-                      <Icons2 name="clockcircleo" className="bg-slate-600 p-3 self-start" size={12} color="white" onPress={handleBackStep} />
-                      <Text className='text-slate-100 text-sm mt-1'>{formattedDate}</Text>
+                    <Text className="bg-secondary-100 text-slate-50 p-2 rounded-3xl font-semibold self-start my-0 opacity-80 text-xs">
+                      {data?.categories[0]?.name}
+                    </Text>
+                    <Text className="text-slate-50 text-2xl font-semibold leading-6 mt-1" numberOfLines={2}>
+                      {data?.post_title}
+                    </Text>
+                    <View className="flex flex-row items-center gap-1">
+                      <Icons2 name="clockcircleo" size={12} color="white" />
+                      <Text className="text-slate-100 text-sm mt-1">{formattedDate}</Text>
                     </View>
                   </View>
                 </View>
@@ -91,9 +93,8 @@ const Details = () => {
                 <Text style={styles.errorText}>Image not available</Text>
               )}
 
-              {/* Render HTML content */}
-              <View className='bg-primary' style={styles.description}>
-
+              <View className="bg-primary" style={styles.description}>
+                <Text className="text-slate-50 text-lg tracking-tighter">{data?.post_title}</Text>
                 {data.post_content && (
                   <RenderHTML
                     contentWidth={Dimensions.get('window').width}
@@ -103,10 +104,9 @@ const Details = () => {
                 )}
               </View>
             </View>
-          )
-        )}
-      </ScrollView>
-      <StatusBar backgroundColor='#161622' style='light' />
+          )}
+        </ScrollView>
+      )}
     </View>
   );
 };
@@ -116,7 +116,7 @@ const tagsStyles = {
     marginVertical: 8,
     fontSize: 16,
     lineHeight: 24,
-    color: '#E2E8F0'
+    color: '#E2E8F0',
   },
   ul: {
     marginVertical: 1,
@@ -136,12 +136,11 @@ const tagsStyles = {
   },
   a: {
     color: 'white',
-  }
+  },
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: '#161622',
   },
   scrollViewContent: {
@@ -165,7 +164,6 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: width,
     height: 400,
-    // borderRadius: 0,
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
@@ -188,17 +186,19 @@ const styles = StyleSheet.create({
   description: {
     borderTopRightRadius: 40,
     borderTopLeftRadius: 40,
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
     paddingVertical: 20,
     position: 'relative',
-    top: -30
+    top: -30,
   },
   loaderContainer: {
-    flex: 1, // Fill available space
+    flex: 1,
     justifyContent: 'center',
-    alignItems: 'center', // Center the loader horizontally
-    backgroundColor: '#161622', // Same background as the parent
+    alignItems: 'center',
+    backgroundColor: '#161622',
   },
 });
 
 export default Details;
+
+

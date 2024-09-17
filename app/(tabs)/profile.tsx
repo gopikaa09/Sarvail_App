@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TouchableOpacity, View, RefreshControl } from 'react-native';
+import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TouchableOpacity, View, RefreshControl, ToastAndroid } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '@/components/FormField';
 import CustomButton from '@/components/CustomButton';
@@ -8,10 +8,13 @@ import { useRouter } from 'expo-router';
 import Icons from 'react-native-vector-icons/EvilIcons';
 import * as ImagePicker from 'expo-image-picker';
 import SimpleStore from 'react-native-simple-store';
+import Icon2 from 'react-native-vector-icons/MaterialIcons'
+import showToast from '@/components/utils/showToast';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false)
   const [refreshing, setRefreshing] = useState(false);
   const [form, setForm] = useState({
     username: '',
@@ -35,6 +38,7 @@ const Profile = () => {
   }, []);
 
   const fetchUserData = async () => {
+    setLoading(true)
     try {
       const User = await SimpleStore.get('user');
       const storedToken = User?.token;
@@ -82,7 +86,7 @@ const Profile = () => {
     await SimpleStore.save('loggedIn', false);
     await SimpleStore.save('user', {});
     await SimpleStore.save('token', '');
-    Alert.alert("Success", "Logged out successfully");
+    showToast("Logged out successfully")
     router.replace('/sign-in');
   };
 
@@ -109,6 +113,7 @@ const Profile = () => {
   };
 
   const uploadProfilePicture = async (imageUri) => {
+    setUploading(true)
     try {
       const formData = new FormData();
       formData.append('ds_profile_pic', {
@@ -135,13 +140,15 @@ const Profile = () => {
           ds_profile_pic: userData.user.ds_profile_pic || '',
         });
         setUser(userData);
-        Alert.alert('Success', 'Profile picture updated successfully');
+        showToast("Profile Picture Updated Sucessfully")
       } else {
         Alert.alert('Error', 'Failed to update profile picture');
       }
     } catch (error) {
       console.error('Error updating profile picture', error);
       Alert.alert('Error', 'An error occurred while updating the profile picture');
+    } finally {
+      setUploading(false)
     }
   };
 
@@ -197,6 +204,8 @@ const Profile = () => {
     fetchUserData();
   };
 
+
+
   if (loading) {
     return (
       <SafeAreaView className='bg-primary flex-1'>
@@ -217,12 +226,31 @@ const Profile = () => {
       >
         <View>
           <TouchableOpacity onPress={() => setModalVisible(true)}>
-            <Image
-              source={{ uri: user?.user?.ds_profile_pic || defaultImage }}
-              style={{ width: 80, height: 80 }}
-              className="rounded-full mt-5"
-              resizeMode="cover"
-            />
+            {
+              uploading ? (
+                <>
+                  <View className='absolute left-8 top-12'>
+                    <ActivityIndicator size="small" color="#fff" />
+                  </View>
+                  <Image
+                    source={{ uri: user?.user?.ds_profile_pic || defaultImage }}
+                    style={{ width: 80, height: 80 }}
+                    className="rounded-full mt-3 relative opacity-30"
+                    resizeMode="cover"
+                  />
+                </>
+              ) : (
+                <>
+                  <Image
+                    source={{ uri: user?.user?.ds_profile_pic || defaultImage }}
+                    style={{ width: 80, height: 80 }}
+                    className="rounded-full mt-3"
+                    resizeMode="cover"
+                  />
+                </>
+              )
+            }
+
             <View className='absolute left-14 top-20 bg-black-100 rounded-2xl p-0.5 flex items-center justify-center'>
               <View className='mb-1'>
                 <Icons name="pencil" size={20} color="white" onPress={openPicker} />
@@ -231,6 +259,13 @@ const Profile = () => {
           </TouchableOpacity>
         </View>
         <Text className='text-white font-semibold text-lg my-2'>{form.first_name} {form.last_name}</Text>
+        <TouchableOpacity onPress={handleLogout}
+          activeOpacity={0.7}
+          className='absolute right-10'
+        >
+          <Icon2 name="logout" size={20} color="white" />
+        </TouchableOpacity>
+
         <FormField
           title="First Name"
           value={form.first_name}
@@ -281,25 +316,6 @@ const Profile = () => {
           />
         </View>
       </ScrollView>
-      <Modal
-        visible={modalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <TouchableOpacity
-            style={{ flex: 1, width: '100%' }}
-            onPress={() => setModalVisible(false)}
-          >
-            <Image
-              source={{ uri: user?.user?.ds_profile_pic || defaultImage }}
-              style={{ width: '100%', height: '100%' }}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 };

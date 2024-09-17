@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, ToastAndroid, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, useRouter } from 'expo-router';
 import CustomButton from '@/components/CustomButton';
 import FormField from '@/components/FormField';
 import axios from 'axios';
 import SimpleStore from 'react-native-simple-store';
+import showToast from '@/components/utils/showToast';
 
 const SignIn = () => {
   const [form, setForm] = useState({
@@ -26,6 +27,8 @@ const SignIn = () => {
   const handlePasswordSubmit = async () => {
     await submit(); // Submit form when password field is submitted
   };
+
+
 
   const submit = async () => {
     if (form.email === "" && form.password === "") {
@@ -58,13 +61,17 @@ const SignIn = () => {
 
       const userData = response.data; // Get user data from the response
 
-      // Save user data to local storage
-      await SimpleStore.save('user', userData);
-      await SimpleStore.save('loggedIn', true);
-      // console.log(userData);
+      if (userData?.token) {
+        await SimpleStore.save('user', userData);
+        await SimpleStore.save('loggedIn', true);
+        showToast("User SignedIn Successfully")
+        // Alert.alert("Success", "User signed in successfully");
+        router.replace("/home");
+      } else {
+        Alert.alert("Success", userData.message);
+        router.push("/(auth)/otpLoginConfirm")
+      }
 
-      Alert.alert("Success", "User signed in successfully");
-      router.replace("/home");
     } catch (error) {
       Alert.alert("Error", "Username or Password is Incorrect");
     } finally {

@@ -6,7 +6,7 @@ import SimpleStore from 'react-native-simple-store';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import Icons from 'react-native-vector-icons/Entypo'
 import { icons } from '@/constants';
-
+import YoutubePlayer from 'react-native-youtube-iframe'
 const { width } = Dimensions.get('window');
 
 export default function PeopleDetails() {
@@ -16,7 +16,7 @@ export default function PeopleDetails() {
   const [error, setError] = useState(null);
   const [token, setToken] = useState('');
   const [index, setIndex] = useState(0);
-  const router = useRouter()
+  const router = useRouter();
   const [routes] = useState([
     { key: 'personal', title: 'Personal Details' },
     { key: 'professional', title: 'Professional Details' },
@@ -45,7 +45,7 @@ export default function PeopleDetails() {
         const response = await fetch(`https://sarvail.net/wp-json/ds-custom_endpoints/v1/users?id=${userId}`, {
           method: 'GET',
           headers: {
-            'Api-Token': `Bearer ${token}`
+            'Api-Token': `Bearer ${token}`,
           },
         });
 
@@ -68,21 +68,9 @@ export default function PeopleDetails() {
     }
   }, [userId, token]);
 
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#000" />
-      </SafeAreaView>
-    );
-  }
-
-  if (error) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>Error: {error.message}</Text>
-      </SafeAreaView>
-    );
-  }
+  const handleBackStep = () => {
+    router.push('people');
+  };
 
   const PersonalDetails = () => (
     <View style={styles.tabContainer}>
@@ -90,7 +78,7 @@ export default function PeopleDetails() {
       <Text style={styles.tabText}>Last Name: {userData?.user_meta?.last_name}</Text>
       <Text style={styles.tabText}>Batch: {userData?.user?.ds_batch}</Text>
       <Text style={styles.tabText}>Email: {userData?.user?.user_email}</Text>
-      <Text style={styles.tabText}>Mobile:{userData?.user_meta?.ds_res_mobile}</Text>
+      <Text style={styles.tabText}>Mobile: {userData?.user_meta?.ds_res_mobile}</Text>
       <Text style={styles.tabText}>Blood Group: {userData?.user_meta?.ds_blood_group}</Text>
       <Text style={styles.tabText}>Gender: {userData?.user_meta?.ds_gender}</Text>
       <Text style={styles.tabText}>Lives In: {userData?.user_meta?.ds_lives_in}</Text>
@@ -123,61 +111,68 @@ export default function PeopleDetails() {
     professional: ProfessionalDetails,
   });
 
-
-  const handleBackStep = () => {
-    router.push('people')
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      </SafeAreaView>
+    );
   }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.errorText}>Error: {error.message}</Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView style={styles.container}>
-      {userData && (
+    <>
+      <SafeAreaView style={styles.container}>
         <View style={styles.headerContainer}>
-          {userData?.user?.ds_profile_pic ? (
-            <>
-              <View style={styles.backgroundImageContainer} />
-              <Image
-                source={{ uri: userData?.user?.ds_profile_pic }}
-                style={styles.profileImage}
-                resizeMode="cover"
-              />
-              <View className=' bg-gray-600 opacity-60 p-2 rounded-3xl absolute self-start m-2' >
-                <Icons name="chevron-left" className="bg-slate-600 p-3 self-start" size={20} color="white" onPress={handleBackStep} />
-              </View>
-            </>
-          ) : (
-            <>
-              <View style={styles.backgroundImageContainer} />
-              <Image
-                source={{ uri: "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg" }}
-                style={styles.profileImage}
-                resizeMode="cover"
-              />
-              <View className=' bg-gray-600 opacity-60 p-2 rounded-3xl absolute self-start m-2' >
-                <Icons name="chevron-left" className="bg-slate-600 p-3 self-start" size={20} color="white" onPress={handleBackStep} />
-              </View>
-            </>
-          )}
+          <View className='bg-gray-600 opacity-60 p-2 rounded-3xl absolute self-start m-2'>
+            <Icons name="chevron-left" className="bg-slate-600 p-3 self-start" size={20} color="white" onPress={handleBackStep} />
+          </View>
+          <Image
+            source={{ uri: userData?.user?.ds_profile_pic || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg" }}
+            style={styles.profileImage}
+            resizeMode="cover"
+          />
           <Text style={styles.userNameText}>
             {userData?.user_meta?.first_name} {userData?.user_meta?.last_name}
           </Text>
         </View>
-      )}
-      <TabView
-        navigationState={{ index, routes }}
-        renderScene={renderScene}
-        onIndexChange={setIndex}
-        initialLayout={{ width }}
-        renderTabBar={props => (
-          <TabBar
-            {...props}
-            style={styles.tabBar}
-            indicatorStyle={styles.tabBarIndicator}
-          />
-        )}
+
+        <TabView
+          navigationState={{ index, routes }}
+          renderScene={renderScene}
+          onIndexChange={setIndex}
+          initialLayout={{ width }}
+          renderTabBar={props => (
+            <TabBar
+              {...props}
+              style={styles.tabBar}
+              indicatorStyle={styles.tabBarIndicator}
+            />
+          )}
+        />
+      </SafeAreaView>
+      <YoutubePlayer
+        height={200}
+        width={300}
+        play={true}
+        videoId={'9jSjhsI8M2o'}
       />
       <StatusBar backgroundColor='#161622' style='light' />
-    </SafeAreaView>
+    </>
   );
 }
+
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -242,5 +237,16 @@ const styles = StyleSheet.create({
     color: '#EF4444',
     fontSize: 18,
     textAlign: 'center',
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#161622',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

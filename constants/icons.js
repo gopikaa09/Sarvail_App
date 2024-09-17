@@ -15,6 +15,7 @@ import liked from "../assets/icons/liked.png";
 import unliked from "../assets/icons/unliked.png";
 import peoples from "../assets/icons/peoples.png";
 import edit from "../assets/icons/edit.png";
+import youtubeIcon from "../assets/icons/Youtubeplay.png";
 
 export default {
   play,
@@ -34,4 +35,5 @@ export default {
   unliked,
   peoples,
   edit,
+  youtubeIcon,
 };

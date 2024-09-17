@@ -17,7 +17,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [query, setQuery] = useState('');
-  const [selectedFilters, setSelectedFilters] = useState([]);
+  const [selectedFilters, setSelectedFilters] = useState(['']);
   const [carouselData, setCarouselData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false); // Start with false
@@ -64,9 +64,7 @@ const Home = () => {
     setRefreshing(page === 1);
     try {
       const categoryQuery = selectedFilters.length > 0 ? `&category=${selectedFilters[0]}` : '';
-      console.log('====================================');
-      console.log(categoryQuery);
-      console.log('====================================');
+
       const response = await fetch(
         `https://sarvail.net/wp-json/ds-custom_endpoints/v1/posts?per_page=20&page=${page}${categoryQuery}`
       );
@@ -117,7 +115,11 @@ const Home = () => {
   }, [query]);
 
   const handleSearch = () => {
+
     if (query) {
+      console.log('====================================');
+      console.log(query);
+      console.log('====================================');
       const filtered = data.filter((item) =>
         item.post_title.toLowerCase().includes(query.toLowerCase())
       );
@@ -128,6 +130,7 @@ const Home = () => {
   };
 
   const TopFilters = [
+    { value: '', label: 'All' },
     { value: 'alumni-news', label: 'Alumni News' },
     { value: 'know-sarvalians', label: 'Know Sarvalians' },
     { value: 'renuions', label: 'Reunions' },
@@ -197,7 +200,6 @@ const Home = () => {
           }
         ]}
       >
-
         <SearchInput
           placeholder="Search..."
           query={query}
@@ -207,25 +209,28 @@ const Home = () => {
           onBlur={() => setSearchFocused(false)}
         />
       </Animated.View>
+      {
+        !query && selectedFilters[0] === '' &&
+        <ScrollView className='-my-2'>
+          <Carousel
+            data={carouselData}
+            width={width}
+            height={280}
+            scrollAnimationDuration={400}
+            snapEnabled={true}
+            mode='parallax'
+            autoPlay={true}
+            autoPlayInterval={2000}
+            showPagination={true}
+            renderItem={({ item }) => (
+              <CorouselCard key={item.ID} item={item} /> // Ensure unique key here
+            )}
+            onScrollBegin={() => setIsCarouselScrolling(true)} // Disable vertical scroll
+            onScrollEnd={() => setIsCarouselScrolling(false)}
+          />
+        </ScrollView>
+      }
 
-      <ScrollView className='-my-2'>
-        <Carousel
-          data={carouselData}
-          width={width}
-          height={280}
-          scrollAnimationDuration={400}
-          snapEnabled={true}
-          mode='parallax'
-          autoPlay={true}
-          autoPlayInterval={2000}
-          showPagination={true}
-          renderItem={({ item }) => (
-            <CorouselCard key={item.ID} item={item} /> // Ensure unique key here
-          )}
-          onScrollBegin={() => setIsCarouselScrolling(true)} // Disable vertical scroll
-          onScrollEnd={() => setIsCarouselScrolling(false)}
-        />
-      </ScrollView>
     </View>
   );
 
@@ -283,7 +288,14 @@ const Home = () => {
     setPage((prevPage) => prevPage + 1);
   }, 200);
 
+  const [visibleItems, setVisibleItems] = useState([]);
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 50,
+  });
 
+  const onViewableItemsChanged = useRef(({ viewableItems }) => {
+    setVisibleItems(viewableItems.map(item => item.key));
+  });
 
   return (
     <SafeAreaView className="flex-1 bg-primary">
@@ -301,7 +313,9 @@ const Home = () => {
           keyExtractor={(item) => item.ID.toString()}
           renderItem={({ item }) => (
             <View key={item?.ID}>
-              <ImageCard item={item} />
+              <ImageCard item={item}
+                isVisible={visibleItems.includes(item.ID.toString())}
+              />
             </View>
           )}
           ListHeaderComponent={headerComponent()}
@@ -324,6 +338,8 @@ const Home = () => {
             setPage(1);  // Reset page
             fetchData();  // Fetch new data
           }}
+          onViewableItemsChanged={onViewableItemsChanged.current}
+          viewabilityConfig={viewabilityConfig.current}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.2}
           onScroll={handleScroll}

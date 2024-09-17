@@ -5,6 +5,7 @@ import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Icons from 'react-native-vector-icons/Entypo';
 
 export default function ConfirmOTP() {
   const [form, setForm] = useState({
@@ -14,7 +15,9 @@ export default function ConfirmOTP() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [otpRequested, setOtpRequested] = useState(false);
   const router = useRouter();
-
+  const handleBackStep = () => {
+    router.back()
+  }
   const requestOtp = async () => {
     if (form.username === "") {
       Alert.alert("Error", "Please enter your username.");
@@ -68,6 +71,9 @@ export default function ConfirmOTP() {
     <SafeAreaView className="bg-primary h-full flex-1">
       <ScrollView>
         <View className="w-full justify-center min-h-[85vh] px-4 my-6">
+          <View className="self-start bg-gray-600 opacity-60 p-2 rounded-3xl relative -top-52">
+            <Icons name="chevron-left" size={20} color="white" onPress={handleBackStep} />
+          </View>
           <View className="flex flex-row items-end">
             <Text className="text-secondary-100 text-4xl">S</Text>
             <Text className="font-semibold text-3xl text-gray-100">arvail</Text>
