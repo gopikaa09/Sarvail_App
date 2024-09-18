@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TouchableOpacity, View, RefreshControl, ToastAndroid, StyleSheet } from 'react-native';
+import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TouchableOpacity, View, RefreshControl, ToastAndroid, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '@/components/FormField';
 import CustomButton from '@/components/CustomButton';
@@ -163,9 +163,9 @@ const Profile = () => {
     );
   }
   const ListData = [
-    { id: 1, title: "Personal Details", route: '/pages/personalDetailsUpdate' },
-    { id: 2, title: "Professional Details", route: '/pages/proffesionalDetailsUpdate' },
-    { id: 3, title: "Update Password", route: '/pages/updatePassword' },
+    { id: 1, title: "Personal Details", route: '/profile/personal' },
+    { id: 2, title: "Professional Details", route: '/profile/professional' },
+    { id: 3, title: "Update Password", route: '/profile/updatePassword' },
 
   ]
   const handleItemPress = (item) => {
@@ -220,12 +220,14 @@ const Profile = () => {
         renderItem={({ item }) => (
           <TouchableOpacity
             activeOpacity={1}
-            onPress={() => handleItemPress(item)}>
+          >
             <View className='flex flex-row items-center justify-between space-x-4 w-full h-12 px-4 my-2 bg-black-100 rounded-xl border-2 border-black-200'>
               <Text style={styles.listItemText}>{item.title}</Text>
-              <Icons name="chevron-right" size={20} color="white" onPress={() => handleItemPress(item)} />
-            </View>
 
+              <Pressable onPress={() => router.push(item.route)}>
+                <Icons name="chevron-right" size={20} color="white" />
+              </Pressable>
+            </View>
           </TouchableOpacity>
         )}
         contentContainerStyle={styles.listContainer}

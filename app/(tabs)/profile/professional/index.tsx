@@ -2,7 +2,7 @@ import CustomButton from '@/components/CustomButton';
 import FormField from '@/components/FormField';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, Platform, ScrollView } from 'react-native';
+import { ActivityIndicator, Alert, Platform, ScrollView } from 'react-native';
 import { View, Text, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icons from 'react-native-vector-icons/Entypo';
@@ -24,6 +24,7 @@ export default function ProfessionalDetailsUpdate() {
     ds_pin: ''
   })
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false)
   const [user, setUser] = useState(null);
   const [token, setToken] = useState('');
 
@@ -87,7 +88,7 @@ export default function ProfessionalDetailsUpdate() {
       ds_city: form.ds_city,
       ds_pin: form.ds_pin
     }).toString();
-
+    setUpdating(true)
     try {
       const response = await axios.post(
         `https://www.sarvail.net/wp-json/ds-custom_endpoints/v1/me?${queryParams}`,
@@ -111,6 +112,8 @@ export default function ProfessionalDetailsUpdate() {
     } catch (error) {
       console.error('Error updating profile', error);
       Alert.alert('Error', 'An error occurred while updating the profile');
+    } finally {
+      setUpdating(false)
     }
   };
   const handleBackStep = () => {
@@ -121,90 +124,98 @@ export default function ProfessionalDetailsUpdate() {
       behavior={Platform.OS === 'ios' ? 'padding' : ''}
     >
       <SafeAreaView className='bg-primary h-full'>
-        <ScrollView bounces={false}>
-          <View className='w-full justify-center min-h-[85vh] px-4 my-6'>
-            <View className="self-start bg-gray-600 opacity-60 p-2 rounded-3xl relative -top-9">
-              <Icons name="chevron-left" size={20} color="white" onPress={handleBackStep} />
-            </View>
-            <Text className='text-white text-xl'>Update Professional Details</Text>
-            <FormField
-              title="Profession"
-              value={form.ds_profession}
-              handleChangeText={(e) => setForm({ ...form, ds_profession: e })}
-              otherStyles="mt-7"
-              placeholder="Profession"
-            />
-            <FormField
-              title="Specilization"
-              value={form.ds_specialization}
-              handleChangeText={(e) => setForm({ ...form, ds_specialization: e })}
-              otherStyles="mt-7"
-              placeholder="Specilization"
-            />
-            <FormField
-              title="Designation"
-              value={form.ds_designation}
-              handleChangeText={(e) => setForm({ ...form, ds_designation: e })}
-              otherStyles="mt-7"
-              placeholder="Designation"
-            />
-            <FormField
-              title="Organization"
-              value={form.ds_organization}
-              handleChangeText={(e) => setForm({ ...form, ds_organization: e })}
-              otherStyles="mt-7"
-              placeholder="Organization"
-            />
-            <FormField
-              title="Mobile Number"
-              value={form.ds_off_mobile}
-              handleChangeText={(e) => setForm({ ...form, ds_off_mobile: e })}
-              otherStyles="mt-7"
-              placeholder="Mobile Number"
-            />
-            <FormField
-              title="Address"
-              value={form.ds_off_address}
-              handleChangeText={(e) => setForm({ ...form, ds_off_address: e })}
-              otherStyles="mt-7"
-              placeholder="Address"
-            />
-            <FormField
-              title="Country"
-              value={form.ds_country}
-              handleChangeText={(e) => setForm({ ...form, ds_country: e })}
-              otherStyles="mt-7"
-              placeholder="Country"
-            />
-            <FormField
-              title="State"
-              value={form.ds_state}
-              handleChangeText={(e) => setForm({ ...form, ds_state: e })}
-              otherStyles="mt-7"
-              placeholder="State"
-            />
-            <FormField
-              title="City"
-              value={form.ds_city}
-              handleChangeText={(e) => setForm({ ...form, ds_city: e })}
-              otherStyles="mt-7"
-              placeholder="Batch"
-            />
-            <FormField
-              title="Zip Code"
-              value={form.ds_pin}
-              handleChangeText={(e) => setForm({ ...form, ds_pin: e })}
-              otherStyles="mt-7"
-              placeholder="Zip Code"
-            />
-            <CustomButton
-              title="Update"
-              handlePress={handleUpdate} // Add the update handler
-              containerStyles="mt-7 px-5 min-h-[50px]"
-            />
+        {
+          loading ?
+            <View className='flex-1 h-full justify-center items-center'>
+              <ActivityIndicator color="#fff" size="large" />
+            </View> :
+            <ScrollView bounces={false}>
+              <View className='w-full justify-center min-h-[85vh] px-4 my-6'>
+                <View className="self-start bg-gray-600 opacity-60 p-2 rounded-3xl relative -top-4">
+                  <Icons name="chevron-left" size={20} color="white" onPress={handleBackStep} />
+                </View>
+                <Text className='text-white text-xl'>Update Professional Details</Text>
+                <FormField
+                  title="Profession"
+                  value={form.ds_profession}
+                  handleChangeText={(e) => setForm({ ...form, ds_profession: e })}
+                  otherStyles="mt-7"
+                  placeholder="Profession"
+                />
+                <FormField
+                  title="Specilization"
+                  value={form.ds_specialization}
+                  handleChangeText={(e) => setForm({ ...form, ds_specialization: e })}
+                  otherStyles="mt-7"
+                  placeholder="Specilization"
+                />
+                <FormField
+                  title="Designation"
+                  value={form.ds_designation}
+                  handleChangeText={(e) => setForm({ ...form, ds_designation: e })}
+                  otherStyles="mt-7"
+                  placeholder="Designation"
+                />
+                <FormField
+                  title="Organization"
+                  value={form.ds_organization}
+                  handleChangeText={(e) => setForm({ ...form, ds_organization: e })}
+                  otherStyles="mt-7"
+                  placeholder="Organization"
+                />
+                <FormField
+                  title="Mobile Number"
+                  value={form.ds_off_mobile}
+                  handleChangeText={(e) => setForm({ ...form, ds_off_mobile: e })}
+                  otherStyles="mt-7"
+                  placeholder="Mobile Number"
+                />
+                <FormField
+                  title="Address"
+                  value={form.ds_off_address}
+                  handleChangeText={(e) => setForm({ ...form, ds_off_address: e })}
+                  otherStyles="mt-7"
+                  placeholder="Address"
+                />
+                <FormField
+                  title="Country"
+                  value={form.ds_country}
+                  handleChangeText={(e) => setForm({ ...form, ds_country: e })}
+                  otherStyles="mt-7"
+                  placeholder="Country"
+                />
+                <FormField
+                  title="State"
+                  value={form.ds_state}
+                  handleChangeText={(e) => setForm({ ...form, ds_state: e })}
+                  otherStyles="mt-7"
+                  placeholder="State"
+                />
+                <FormField
+                  title="City"
+                  value={form.ds_city}
+                  handleChangeText={(e) => setForm({ ...form, ds_city: e })}
+                  otherStyles="mt-7"
+                  placeholder="Batch"
+                />
+                <FormField
+                  title="Zip Code"
+                  value={form.ds_pin}
+                  handleChangeText={(e) => setForm({ ...form, ds_pin: e })}
+                  otherStyles="mt-7"
+                  placeholder="Zip Code"
+                />
+                <CustomButton
+                  title="Update"
+                  handlePress={handleUpdate} // Add the update handler
+                  containerStyles="mt-7 px-5 min-h-[50px]"
+                  isLoading={updating}
+                />
 
-          </View>
-        </ScrollView>
+              </View>
+            </ScrollView>
+        }
+
       </SafeAreaView>
     </KeyboardAvoidingView>
   );

@@ -17,12 +17,19 @@ const FormField = forwardRef(({ title, value, placeholder, handleChangeText, oth
           placeholder={placeholder}
           placeholderTextColor='#7b7b8b'
           onChangeText={handleChangeText}
-          secureTextEntry={title === 'Password' && !showPassword}
+          secureTextEntry={title === 'Password' && !showPassword || title === "Confirm Password" && !showPassword}
           onSubmitEditing={onSubmitEditing}
           {...props}
         />
         {
           title === 'Password' && (
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Image source={!showPassword ? icons.eye : icons.eyeHide} className='w-6 h-6' resizeMode='contain' />
+            </TouchableOpacity>
+          )
+        }
+        {
+          title === "Confirm Password" && (
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
               <Image source={!showPassword ? icons.eye : icons.eyeHide} className='w-6 h-6' resizeMode='contain' />
             </TouchableOpacity>
