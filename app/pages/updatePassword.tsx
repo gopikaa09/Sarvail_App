@@ -1,7 +1,8 @@
 import CustomButton from '@/components/CustomButton';
 import FormField from '@/components/FormField';
+import showToast from '@/components/utils/showToast';
 import axios from 'axios';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { View, Text, SafeAreaView, ScrollView, Alert } from 'react-native';
 import SimpleStore from 'react-native-simple-store';
@@ -29,9 +30,9 @@ export default function UpdatePassword() {
   const submit = async () => {
     if (form.update_password === form.confirm_password) {
       try {
-        const response = await axios.post('https://www.sarvail.net/uat/wp-json/ds-custom_endpoints/v1/me/',
+        const response = await axios.post('https://sarvail.net/wp-json/ds-custom_endpoints/v1/me/update_password',
           {
-            update_password: form.update_password
+            password: form.update_password
           },
           {
             headers: {
@@ -39,6 +40,10 @@ export default function UpdatePassword() {
             }
           }
         )
+        if (response.status === 200) {
+          showToast("Password Updated Successfully")
+          router.back()
+        }
       } catch (err) {
         Alert.alert("error", "")
       }
@@ -48,12 +53,9 @@ export default function UpdatePassword() {
     <SafeAreaView className='bg-primary h-full'>
       <ScrollView>
         <View className='w-full justify-center min-h-[85vh] px-4 my-6'>
-          <View className='flex flex-row items-end'>
-            <Text className='text-secondary-100 text-4xl'>S</Text><Text className="font-semibold text-3xl text-gray-100">arvail</Text>
-          </View>
-          <Text className='text-white text-xl'>Log in to Sarvail</Text>
+          <Text className='text-white text-xl'>Update Password</Text>
           <FormField
-            title="Email"
+            title="Password"
             value={form.update_password}
             handleChangeText={(e) => setForm({
               ...form,
@@ -64,7 +66,7 @@ export default function UpdatePassword() {
             placeholder="Enter Email.."
           />
           <FormField
-            title="Password"
+            title="Confirm Password"
             value={form.confirm_password}
             handleChangeText={(e) => setForm({
               ...form,
@@ -75,15 +77,11 @@ export default function UpdatePassword() {
             secureTextEntry={true}
           />
           <CustomButton
-            title="Sign In"
+            title="Update Password"
             handlePress={submit}
             isLoading={isSubmitting}
             containerStyles="mt-7"
           />
-          <View className='justify-center pt-5 flex-row gap-1'>
-            <Text className='text-lg text-gray-100 font-pregular'>Don't have an account?</Text>
-            <Link href="/sign-up" className='text-lg text-secondary font-pregular'>Sign Up</Link>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

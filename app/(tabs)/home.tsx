@@ -27,6 +27,7 @@ const Home = () => {
   const [isCarouselScrolling, setIsCarouselScrolling] = useState(false);  // New state
   const [page, setPage] = useState(1); // Track current page
   const [hasMore, setHasMore] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const router = useRouter();
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -141,26 +142,48 @@ const Home = () => {
   ];
 
 
-  const CorouselCard = React.useCallback(({ item }) => (
-    <View style={styles.itemContainer}>
-      <Image
-        source={{ uri: item?.featured_image?.medium_large }}
-        style={styles.image}
-      />
-      <LinearGradient
-        colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
-        style={styles.background}
-      />
-      <View style={styles.textContainer}>
-        <Text className='bg-secondary-100 text-slate-50 p-2 rounded-3xl font-semibold self-start my-0 opacity-80 text-xs'>{item?.categories[0]?.name}</Text>
-        <Text style={styles.text} numberOfLines={2}
-          onPress={() => {
-            router.push(`/details/${item.ID}`);
-          }}
-        >{item.post_title}</Text>
-      </View>
-    </View>
-  ), [router]);
+  const CorouselCard = React.memo(({ item, index, activeIndex, onPress }) => {
+    const animatedOpacity = useRef(new Animated.Value(index === activeIndex ? 1 : 1)).current;
+
+    useEffect(() => {
+      Animated.timing(animatedOpacity, {
+        toValue: index === activeIndex ? 1 : 1,
+        duration: 250,  // Adjust the duration to your liking
+        useNativeDriver: true,
+      }).start();
+    }, [index, activeIndex]);
+
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          if (index === activeIndex) {
+            onPress(item.ID);
+          }
+        }}
+        disabled={index !== activeIndex}
+      >
+        <Animated.View style={[styles.itemContainer, { opacity: animatedOpacity }]}>
+          <Image
+            source={{ uri: item?.featured_image?.medium_large }}
+            style={styles.image}
+          />
+          <LinearGradient
+            colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
+            style={styles.background}
+          />
+          <View style={styles.textContainer}>
+            <Text className='bg-secondary-100 text-slate-50 p-2 rounded-3xl font-semibold self-start my-0 opacity-80 text-xs'>{item?.categories[0]?.name}</Text>
+            <Text style={styles.text} numberOfLines={2}>
+              {item.post_title}
+            </Text>
+          </View>
+        </Animated.View>
+      </TouchableOpacity>
+    );
+  });
+
+
+
 
   const headerComponent = () => (
     <View className="mt-2">
@@ -216,18 +239,26 @@ const Home = () => {
             data={carouselData}
             width={width}
             height={280}
-            scrollAnimationDuration={400}
+            scrollAnimationDuration={200}  // Reduced from 400ms to 250ms for quicker response
             snapEnabled={true}
-            mode='parallax'
+            mode="parallax"
             autoPlay={true}
             autoPlayInterval={2000}
             showPagination={true}
-            renderItem={({ item }) => (
-              <CorouselCard key={item.ID} item={item} /> // Ensure unique key here
+            renderItem={({ item, index }) => (
+              <CorouselCard
+                key={item.ID}
+                item={item}
+                index={index}
+                activeIndex={activeIndex}
+                onPress={(id) => router.push(`/details/${id}`)} // Pass press handler
+              />
             )}
-            onScrollBegin={() => setIsCarouselScrolling(true)} // Disable vertical scroll
-            onScrollEnd={() => setIsCarouselScrolling(false)}
+            onScrollBeginDrag={() => setIsCarouselScrolling(true)}   // Disable FlatList scroll when carousel starts scrolling
+            onScrollEndDrag={() => setIsCarouselScrolling(false)}
+            onSnapToItem={(index) => setActiveIndex(index)}  // Update activeIndex instantly
           />
+
         </ScrollView>
       }
 

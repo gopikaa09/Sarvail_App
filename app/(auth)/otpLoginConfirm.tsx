@@ -1,5 +1,6 @@
 import CustomButton from '@/components/CustomButton';
 import FormField from '@/components/FormField';
+import showToast from '@/components/utils/showToast';
 import axios from 'axios';
 import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -30,7 +31,7 @@ export default function ConfirmOTP() {
       );
       if (response.status === 200) {
         setOtpRequested(true);
-        Alert.alert("Success", "OTP has been sent to your registered contact.");
+        showToast("OTP has been sent to your registered contact.")
       }
     } catch (error) {
       // setOtpRequested(true);
@@ -56,7 +57,7 @@ export default function ConfirmOTP() {
         }
       );
       if (response.status === 200) {
-        Alert.alert("Success", "OTP verified successfully.");
+        showToast("OTP verified successfully.")
         router.replace("/sign-in");
       }
     } catch (error) {

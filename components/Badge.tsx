@@ -13,3 +13,8 @@ export default function Badge({ text, onPress, isSelected }) {
     </TouchableOpacity>
   );
 }
+
+
+
+
+

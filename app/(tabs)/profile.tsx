@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TouchableOpacity, View, RefreshControl, ToastAndroid } from 'react-native';
+import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TouchableOpacity, View, RefreshControl, ToastAndroid, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '@/components/FormField';
 import CustomButton from '@/components/CustomButton';
@@ -10,6 +10,7 @@ import * as ImagePicker from 'expo-image-picker';
 import SimpleStore from 'react-native-simple-store';
 import Icon2 from 'react-native-vector-icons/MaterialIcons'
 import showToast from '@/components/utils/showToast';
+import { FlatList } from 'react-native-gesture-handler';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -142,7 +143,7 @@ const Profile = () => {
         setUser(userData);
         showToast("Profile Picture Updated Sucessfully")
       } else {
-        Alert.alert('Error', 'Failed to update profile picture');
+        showToast('Failed to update profile picture');
       }
     } catch (error) {
       console.error('Error updating profile picture', error);
@@ -151,60 +152,6 @@ const Profile = () => {
       setUploading(false)
     }
   };
-
-  const handleUpdate = async () => {
-    const queryParams = new URLSearchParams({
-      first_name: form.first_name,
-      last_name: form.last_name,
-      ds_batch: form.ds_batch,
-      ds_res_mobile: form.ds_res_mobile,
-      user_email: form.user_email,
-      country_code: form.country_code,
-      password: form.password,
-      ds_profession: form.ds_profession,
-    }).toString();
-
-    try {
-      const response = await axios.post(
-        `https://www.sarvail.net/wp-json/ds-custom_endpoints/v1/me?${queryParams}`,
-        {},
-        {
-          headers: {
-            'Api-Token': `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        Alert.alert('Success', 'Profile updated successfully');
-        const updatedUser = response.data;
-        setUser(updatedUser);
-        setForm({
-          ...form,
-          first_name: updatedUser.user_meta.first_name,
-          last_name: updatedUser.user_meta.last_name,
-          ds_batch: updatedUser.user.ds_batch,
-          ds_res_mobile: updatedUser.user_meta.ds_res_mobile,
-          country_code: updatedUser.user_meta.country_code,
-          ds_profession: updatedUser.user_meta.ds_profession,
-          ds_profile_pic: updatedUser.user.ds_profile_pic
-        });
-        await SimpleStore.update('user', updatedUser);
-      } else {
-        Alert.alert('Error', 'Failed to update profile');
-      }
-    } catch (error) {
-      console.error('Error updating profile', error);
-      Alert.alert('Error', 'An error occurred while updating the profile');
-    }
-  };
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchUserData();
-  };
-
-
 
   if (loading) {
     return (
@@ -215,109 +162,144 @@ const Profile = () => {
       </SafeAreaView>
     );
   }
+  const ListData = [
+    { id: 1, title: "Personal Details", route: '/pages/personalDetailsUpdate' },
+    { id: 2, title: "Professional Details", route: '/pages/proffesionalDetailsUpdate' },
+    { id: 3, title: "Update Password", route: '/pages/updatePassword' },
+
+  ]
+  const handleItemPress = (item) => {
+    router.replace(item?.route)
+  }
 
   return (
-    <SafeAreaView className='bg-primary flex-1'>
-      <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 20, alignItems: 'center' }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        <View>
-          <TouchableOpacity onPress={() => setModalVisible(true)}>
-            {
-              uploading ? (
-                <>
-                  <View className='absolute left-8 top-12'>
-                    <ActivityIndicator size="small" color="#fff" />
-                  </View>
-                  <Image
-                    source={{ uri: user?.user?.ds_profile_pic || defaultImage }}
-                    style={{ width: 80, height: 80 }}
-                    className="rounded-full mt-3 relative opacity-30"
-                    resizeMode="cover"
-                  />
-                </>
-              ) : (
-                <>
-                  <Image
-                    source={{ uri: user?.user?.ds_profile_pic || defaultImage }}
-                    style={{ width: 80, height: 80 }}
-                    className="rounded-full mt-3"
-                    resizeMode="cover"
-                  />
-                </>
-              )
-            }
-
-            <View className='absolute left-14 top-20 bg-black-100 rounded-2xl p-0.5 flex items-center justify-center'>
-              <View className='mb-1'>
-                <Icons name="pencil" size={20} color="white" onPress={openPicker} />
-              </View>
+    <SafeAreaView className='flex-1 bg-primary'>
+      <View className='items-center my-10'>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          {
+            uploading ? (
+              <>
+                <View className='absolute left-8 top-12'>
+                  <ActivityIndicator size="small" color="#fff" />
+                </View>
+                <Image
+                  source={{ uri: user?.user?.ds_profile_pic || defaultImage }}
+                  style={{ width: 80, height: 80 }}
+                  className="rounded-full mt-3 relative opacity-30"
+                  resizeMode="cover"
+                />
+              </>
+            ) : (
+              <>
+                <Image
+                  source={{ uri: user?.user?.ds_profile_pic || defaultImage }}
+                  style={{ width: 80, height: 80 }}
+                  className="rounded-full mt-3"
+                  resizeMode="cover"
+                />
+              </>
+            )
+          }
+          <View className='absolute left-14 top-14 bg-black-100 rounded-2xl p-0.5 flex items-center justify-center'>
+            <View className='mb-1'>
+              <Icons name="pencil" size={20} color="white" onPress={openPicker} />
             </View>
-          </TouchableOpacity>
-        </View>
-        <Text className='text-white font-semibold text-lg my-2'>{form.first_name} {form.last_name}</Text>
-        <TouchableOpacity onPress={handleLogout}
-          activeOpacity={0.7}
-          className='absolute right-10'
-        >
-          <Icon2 name="logout" size={20} color="white" />
+          </View>
         </TouchableOpacity>
+        <Text style={styles.profileName}>{form.first_name} {form.last_name}</Text>
+      </View>
+      <TouchableOpacity onPress={handleLogout}
+        activeOpacity={0.7}
+        className='absolute right-10 top-10'
+      >
+        <Icon2 name="logout" size={20} color="white" />
+      </TouchableOpacity>
+      <FlatList
+        data={ListData}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => handleItemPress(item)}>
+            <View className='flex flex-row items-center justify-between space-x-4 w-full h-12 px-4 my-2 bg-black-100 rounded-xl border-2 border-black-200'>
+              <Text style={styles.listItemText}>{item.title}</Text>
+              <Icons name="chevron-right" size={20} color="white" onPress={() => handleItemPress(item)} />
+            </View>
 
-        <FormField
-          title="First Name"
-          value={form.first_name}
-          handleChangeText={(e) => setForm({ ...form, first_name: e })}
-          otherStyles="mt-7"
-          placeholder="First Name"
+          </TouchableOpacity>
+        )}
+        contentContainerStyle={styles.listContainer}
+      />
+      {/* <View className='flex-1 justify-center items-center'>
+        <CustomButton
+          title="Log Out"
+          handlePress={handleLogout} // Add the update handler
+          containerStyles="mt-7 px-5 min-h-[50px] w-32 mb-36"
         />
-        <FormField
-          title="Last Name"
-          value={form.last_name}
-          handleChangeText={(e) => setForm({ ...form, last_name: e })}
-          otherStyles="mt-7"
-          placeholder="Last Name"
-        />
-        <FormField
-          title="Email"
-          value={form.user_email}
-          handleChangeText={(e) => setForm({ ...form, user_email: e })}
-          otherStyles="mt-7"
-          isEditable={false}
-          keyboardType='email-address'
-          placeholder="Enter Email.."
-        />
-        <FormField
-          title="Batch"
-          value={form.ds_batch}
-          handleChangeText={(e) => setForm({ ...form, ds_batch: e })}
-          otherStyles="mt-7"
-          placeholder="Enter Batch.."
-        />
-        <FormField
-          title="Profession"
-          value={form.ds_profession}
-          handleChangeText={(e) => setForm({ ...form, ds_profession: e })}
-          otherStyles="mt-7"
-          placeholder="Enter Profession.."
-        />
-        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly', width: '100%' }} className='mb-4'>
-          <CustomButton
-            title="Update"
-            handlePress={handleUpdate} // Add the update handler
-            containerStyles="mt-7 px-5 min-h-[50px]"
-          />
-          <CustomButton
-            title="Log Out"
-            handlePress={handleLogout}
-            containerStyles="bg-white mt-7 px-5 py-2 min-h-[50px]"
-          />
-        </View>
-      </ScrollView>
+      </View> */}
     </SafeAreaView>
   );
 };
 
 export default Profile;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#1E293B',
+  },
+  profileContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  profileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  profileImageUploading: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    opacity: 0.3,
+  },
+  uploadingContainer: {
+    position: 'absolute',
+    left: 10,
+    top: 10,
+  },
+  editIconContainer: {
+    position: 'absolute',
+    left: 46,
+    top: 32,
+    backgroundColor: 'black',
+    borderRadius: 50,
+    padding: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileName: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 18,
+    marginTop: 10,
+  },
+  logoutButton: {
+    position: 'absolute',
+    right: 10,
+    top: 20,
+  },
+  listContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  listItem: {
+    backgroundColor: '#161622',
+    padding: 10,
+    marginVertical: 5,
+    borderRadius: 5,
+  },
+  listItemText: {
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+});
