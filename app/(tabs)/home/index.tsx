@@ -162,7 +162,7 @@ const Home = () => {
         }}
         disabled={index !== activeIndex}
       >
-        <Animated.View style={[styles.itemContainer, { opacity: animatedOpacity }]}>
+        <Animated.View className="-mb-24" style={[styles.itemContainer, { opacity: animatedOpacity }]}>
           <Image
             source={{ uri: item?.featured_image?.medium_large }}
             style={styles.image}
@@ -172,7 +172,7 @@ const Home = () => {
             style={styles.background}
           />
           <View style={styles.textContainer}>
-            <Text className='bg-secondary-100 text-slate-50 p-2 rounded-3xl font-semibold self-start my-0 opacity-80 text-xs'>{item?.categories[0]?.name}</Text>
+            <Text className='bg-secondary-100 text-slate-50 py-1 px-1.5 rounded-3xl font-semibold self-start my-0 opacity-80 text-xs'>{item?.categories[0]?.name}</Text>
             <Text style={styles.text} numberOfLines={2}>
               {item.post_title}
             </Text>
@@ -223,18 +223,21 @@ const Home = () => {
           }
         ]}
       >
-        <SearchInput
-          placeholder="Search..."
-          query={query}
-          setQuery={setQuery}
-          onSearch={handleSearch}
-          onFocus={() => setSearchFocused(true)}
-          onBlur={() => setSearchFocused(false)}
-        />
+        <View className='relative'>
+          <SearchInput
+
+            placeholder="Search..."
+            query={query}
+            setQuery={setQuery}
+            onSearch={handleSearch}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
+          />
+        </View>
       </Animated.View>
       {
         !query && selectedFilters[0] === '' &&
-        <ScrollView className='-my-2'>
+        <ScrollView className='-mt-2 -mb-11'>
           <Carousel
             data={carouselData}
             width={width}
@@ -340,43 +343,45 @@ const Home = () => {
           <Text className="text-red-500 text-lg">Error: {error.message}</Text>
         </View>
       ) : (
-        <FlatList
-          data={filteredData}
-          keyExtractor={(item) => item.ID.toString()}
-          renderItem={({ item }) => (
-            <View key={item?.ID}>
-              <ImageCard item={item}
-                isVisible={visibleItems.includes(item.ID.toString())}
-              />
-            </View>
-          )}
-          ListHeaderComponent={headerComponent()}
-          ListEmptyComponent={() => (
-            <View className="flex-1 justify-center items-center">
-              <Text className="text-gray-100 text-lg">No data available</Text>
-            </View>
-          )}
-          ListFooterComponent={
-            loading && hasMore && filteredData.length > 0 ? ( // Show loader at the end
-              <View className="flex-1 justify-center items-center p-4">
-                <ActivityIndicator size="large" color="#fff" />
+        <View>
+          <FlatList
+            data={filteredData}
+            keyExtractor={(item) => item.ID.toString()}
+            renderItem={({ item }) => (
+              <View key={item?.ID}>
+                <ImageCard item={item}
+                  isVisible={visibleItems.includes(item.ID.toString())}
+                />
               </View>
-            ) : null
-          }
-          keyboardShouldPersistTaps="always"
-          keyboardDismissMode="on-drag"
-          refreshing={refreshing}
-          onRefresh={() => {
-            setPage(1);  // Reset page
-            fetchData();  // Fetch new data
-          }}
-          onViewableItemsChanged={onViewableItemsChanged.current}
-          viewabilityConfig={viewabilityConfig.current}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.2}
-          onScroll={handleScroll}
-          scrollEnabled={!isCarouselScrolling}  // Disable scroll when carousel is active
-        />
+            )}
+            ListHeaderComponent={headerComponent()}
+            ListEmptyComponent={() => (
+              <View className="flex-1 justify-center items-center">
+                <Text className="text-gray-100 text-lg">No data available</Text>
+              </View>
+            )}
+            ListFooterComponent={
+              loading && hasMore && filteredData.length > 0 ? ( // Show loader at the end
+                <View className="flex-1 justify-center items-center p-4">
+                  <ActivityIndicator size="large" color="#fff" />
+                </View>
+              ) : null
+            }
+            keyboardShouldPersistTaps="always"
+            keyboardDismissMode="on-drag"
+            refreshing={refreshing}
+            onRefresh={() => {
+              setPage(1);  // Reset page
+              fetchData();  // Fetch new data
+            }}
+            onViewableItemsChanged={onViewableItemsChanged.current}
+            viewabilityConfig={viewabilityConfig.current}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.2}
+            onScroll={handleScroll}
+            scrollEnabled={!isCarouselScrolling}  // Disable scroll when carousel is active
+          />
+        </View>
       )}
     </SafeAreaView>
   );
@@ -390,16 +395,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 0,
+    marginBottom: -12,
+    position: 'absolute'
   },
   image: {
     width: width * 0.97,
-    height: 280,
+    height: 240,
     borderRadius: 10,
   },
   background: {
     position: 'absolute',
     width: width * 0.97,
-    height: 280,
+    height: 240,
     borderRadius: 10,
     bottom: 0,
   },
@@ -425,6 +432,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingTop: 10,
     overflow: 'hidden',
-    marginBottom: 10
+    marginBottom: 0
   },
 });

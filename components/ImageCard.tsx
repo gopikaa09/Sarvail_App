@@ -67,7 +67,7 @@ const ImageCard = ({ item, isVisible }) => {
       )}
 
       <TouchableOpacity onPress={handlePress}>
-        <View className="ml-0 mt-2">
+        <View className="ml-0 mt-2 text-base">
           <Text className="font-psemibold text-lg text-white leading-6" numberOfLines={2}>
             {item?.post_title}
           </Text>
@@ -76,14 +76,16 @@ const ImageCard = ({ item, isVisible }) => {
 
       <View className="flex flex-row justify-between">
         <Text className="text-gray-400 text-sm">{new Date(item?.post_date).toLocaleDateString()}</Text>
-        <Icons name="sharealt" size={15} color="white" onPress={handleShare} />
+        <View className='bg-slate-500'>
+          <Icons name="sharealt" size={15} color="white" onPress={handleShare} />
+        </View>
       </View>
 
-      <Text className="bg-secondary-100 text-slate-50 p-1.5 rounded-3xl font-semibold self-start my-0 text-xs absolute top-5 left-6 opacity-80">
+      <Text className="bg-secondary-100 text-slate-50 p-1 px-1.5 rounded-3xl font-semibold self-start my-0 text-xs absolute top-5 left-6 opacity-80">
         {item?.categories[0]?.name}
       </Text>
 
-      <View className="border-t border-gray-50 mt-2" />
+      <View className="border-t border-gray-50 mt-2 opacity-60" />
     </View>
   );
 };

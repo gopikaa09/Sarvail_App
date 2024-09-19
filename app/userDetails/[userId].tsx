@@ -160,12 +160,6 @@ export default function PeopleDetails() {
           )}
         />
       </SafeAreaView>
-      <YoutubePlayer
-        height={200}
-        width={300}
-        play={true}
-        videoId={'9jSjhsI8M2o'}
-      />
       <StatusBar backgroundColor='#161622' style='light' />
     </>
   );

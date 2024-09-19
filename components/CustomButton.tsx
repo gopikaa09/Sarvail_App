@@ -7,7 +7,7 @@ const CustomButton = ({ title, handlePress, containerStyles, textStyles, isLoadi
       onPress={handlePress}
       activeOpacity={0.7}
 
-      className={`bg-secondary rounded-xl min-h-[62px] items-center justify-center ${containerStyles} ${isLoading ? 'opacity-50' : ''}`}
+      className={`bg-secondary rounded-xl min-h-[50px] items-center justify-center ${containerStyles} ${isLoading ? 'opacity-50' : ''}`}
       disabled={isLoading}
     >
       <Text className={`text-primary font-semibold text-lg ${textStyles}`}>{title}</Text>
