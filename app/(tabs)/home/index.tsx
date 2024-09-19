@@ -199,8 +199,8 @@ const Home = () => {
       </Animated.View>
 
       <ScrollView className='-my-2'>
-        <HomeCorousel data={carouselData} />
-        {/* <Carousel
+        {/* <HomeCorousel data={carouselData} /> */}
+        <Carousel
           data={carouselData}
           width={width}
           height={280}
@@ -215,7 +215,7 @@ const Home = () => {
           )}
           onScrollBegin={() => setIsCarouselScrolling(true)} // Disable vertical scroll
           onScrollEnd={() => setIsCarouselScrolling(false)}
-        /> */}
+        />
       </ScrollView>
     </View>
   );
