@@ -64,7 +64,7 @@ const ImageCard = ({ item, isScrolling, isVisible }) => {
         </View>
         {/* Optional menu icon or other elements */}
       </View>
-      {isPlaying ? (
+      {item?.videos?.length !== 0 ? (
         <YoutubePlayer
           height={200}
           width={300}

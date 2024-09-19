@@ -303,7 +303,8 @@ const Home = () => {
         if (event && event.nativeEvent) {
           const currentOffset = event.nativeEvent.contentOffset.y;
           if (prevScrollY.current !== undefined) {
-            if (currentOffset > prevScrollY.current && !searchFocused) {
+            if (currentOffset > prevScrollY.current && !searchFocused && query === "") {
+              // Only hide the search bar if the query is empty
               animateSearchBar(false); // Hide search bar smoothly
             } else {
               animateSearchBar(true);  // Show search bar smoothly
@@ -318,15 +319,15 @@ const Home = () => {
     if (!hasMore || loading) return;
     setPage((prevPage) => prevPage + 1);
   }, 200);
-
   const [visibleItems, setVisibleItems] = useState([]);
+
   const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: 50,
+    itemVisiblePercentThreshold: 50, // Consider item visible when 50% is in view
   });
 
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
     setVisibleItems(viewableItems.map(item => item.key));
-  });
+  }).current;
 
   return (
     <SafeAreaView className="flex-1 bg-primary">
@@ -424,5 +425,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingTop: 10,
     overflow: 'hidden',
+    marginBottom: 10
   },
 });
