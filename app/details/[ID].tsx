@@ -9,6 +9,7 @@ import { icons } from '@/constants';
 const { width } = Dimensions.get('window');
 import Icons from 'react-native-vector-icons/Entypo';
 import Icons2 from 'react-native-vector-icons/AntDesign';
+import YoutubePlayer from "react-native-youtube-iframe";
 
 const Details = () => {
   const { ID } = useLocalSearchParams();
@@ -16,6 +17,7 @@ const Details = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const router = useRouter();
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,6 +49,14 @@ const Details = () => {
   const handleBackStep = () => {
     router.push('home');
   };
+  function getYoutubeVideoId(url) {
+    const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const match = url?.match(regex);
+    return match ? match[1] : null;
+  }
+
+  const videoId = getYoutubeVideoId(data?.videos?.[0]?.td_video);
+  console.log(videoId);
 
   return (
     <View className="bg-primary flex-1">
@@ -64,11 +74,26 @@ const Details = () => {
             <View style={styles.contentContainer} className="bg-primary">
               {data?.featured_image?.large ? (
                 <View style={styles.imageContainer}>
-                  <Image
-                    source={{ uri: data.featured_image.large }}
-                    style={styles.image}
-                    resizeMode="cover"
-                  />
+                  {data?.videos?.length !== 0 ? (
+                    <YoutubePlayer
+                      height={200}
+                      width={340}
+                      play={isPlaying}
+                      videoId={videoId}
+                      volume={100}  // Ensure the sound is enabled
+                      onChangeState={(state) => {
+                        if (state === "ended") {
+                          setIsPlaying(false);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <Image
+                      source={{ uri: item?.featured_image?.medium_large }}
+                      className="w-full h-48 rounded-xl mt-3"
+                      resizeMode="cover"
+                    />
+                  )}
                   <LinearGradient
                     colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
                     style={styles.gradient}
